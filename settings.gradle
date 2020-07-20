@@ -1,0 +1,4 @@
+rootProject.name = 'pricebot'
+include 'harvester'
+include 'store'
+
