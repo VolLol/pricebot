@@ -1,12 +1,9 @@
 package net.example.pricebot.store;
 
-import net.example.pricebot.store.entities.GoodReturnedFromDb;
-import net.example.pricebot.store.entities.GoodPutIntoDb;
-import net.example.pricebot.store.entities.GoodUpdateDateInDb;
-import net.example.pricebot.store.entities.HistoryPricePutIntoDbEntity;
-import net.example.pricebot.store.mappers.GoodMapper;
-import net.example.pricebot.store.mappers.HistoryPriceMapper;
-import net.example.pricebot.store.mappers.UserMapper;
+import net.example.pricebot.store.mappers.GoodsHistoryPriceMapper;
+import net.example.pricebot.store.mappers.GoodsInfoMapper;
+import net.example.pricebot.store.models.GoodsHistoryPriceModel;
+import net.example.pricebot.store.models.GoodsInfoModel;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
@@ -16,9 +13,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 
 import javax.sql.DataSource;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Properties;
 
@@ -41,16 +36,15 @@ public class Mybatis {
         TransactionFactory transactionFactory = new JdbcTransactionFactory();
         Environment environment = new Environment("development", transactionFactory, dataSource);
         Configuration configuration = new Configuration(environment);
-        configuration.addMapper(UserMapper.class);
-        configuration.addMapper(GoodMapper.class);
-        configuration.addMapper(HistoryPriceMapper.class);
+        configuration.addMapper(GoodsInfoMapper.class);
+        configuration.addMapper(GoodsHistoryPriceMapper.class);
         sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
         try (SqlSession session = sqlSessionFactory.openSession()) {
-
-
-
-
+            addGoodToDB(session);
+            showAllGoodsFromUserFromDB(session);
+            addGoodToHistoryPrice(session);
+            showAllHistoryPriceById(session);
         } catch (NullPointerException e) {
             System.out.println("Catch nullPointer");
         }
@@ -58,32 +52,37 @@ public class Mybatis {
 
 
     private static void showAllGoodsFromUserFromDB(SqlSession session) {
-        List<GoodReturnedFromDb> getGoodsByUserId = session.selectList("getGoodsByUserId", 1L);
-        for (GoodReturnedFromDb o : getGoodsByUserId) {
+        List<GoodsInfoModel> goods = session.selectList("getGoodsByTelegramUserId", "2837648726");
+        for (GoodsInfoModel o : goods) {
             System.out.println(o.toString());
         }
     }
 
-    private static void addGoodToTheDB(SqlSession session) {
-        GoodPutIntoDb goodPutIntoDb = new GoodPutIntoDb(1L, "avito", "url here");
-        session.insert("addGood", goodPutIntoDb);
+    private static void addGoodToDB(SqlSession session) {
+        GoodsInfoModel good = new GoodsInfoModel("2837648726",
+                "url here", "TYPE",
+                false,
+                LocalDateTime.now(), LocalDateTime.now());
+        session.insert("addGood", good);
         session.commit();
 
     }
 
-    private static void updateDateInGoodsTable(SqlSession session) {
-        Date newDate = new java.sql.Date(System.currentTimeMillis());
-        GoodUpdateDateInDb goodUpdateDateInDb = new GoodUpdateDateInDb(5L, newDate);
-        session.update("updateDate", goodUpdateDateInDb);
+
+    private static void addGoodToHistoryPrice(SqlSession session) {
+        GoodsHistoryPriceModel model = new GoodsHistoryPriceModel(3L, 4000, LocalDateTime.of(2020, 1, 12, 14, 12));
+        session.insert("addGoodToHistory", model);
         session.commit();
     }
 
-    private static void addEntryToHistoryPriceMethod(SqlSession session) {
-        Date date = new Date(System.currentTimeMillis());
-        HistoryPricePutIntoDbEntity historyPricePutIntoDbEntity = new HistoryPricePutIntoDbEntity(5L, 7000, date);
-        session.insert("addToHistoryPrice", historyPricePutIntoDbEntity);
-        session.commit();
-    }
+    private static void showAllHistoryPriceById(SqlSession session) {
+        Long id = 3L;
+        List<GoodsHistoryPriceModel> prices =
+                session.selectList("getHistoryPriceById", id);
+        for (GoodsHistoryPriceModel entity : prices) {
+            System.out.println(entity.toString());
+        }
 
+    }
 
 }
