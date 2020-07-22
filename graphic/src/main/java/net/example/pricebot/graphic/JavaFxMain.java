@@ -17,6 +17,8 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.*;
 
 public class JavaFxMain extends Application {
@@ -29,17 +31,11 @@ public class JavaFxMain extends Application {
         LineChart lineChart = new LineChart<>(x, y);
         XYChart.Series series = new XYChart.Series();
         GraphicPriceDTO graphicPriceDTO = fullGraphicPriceDTO();
-        GraphicRowItemDTO row = graphicPriceDTO.getItems().get(0);
-        String START_DATE = String.valueOf(row.getDate());
-        row = graphicPriceDTO.getItems().get(5);
-        String FINISH_DATE = String.valueOf(row.getDate());
-        y.setLabel("Price");
-        x.setLabel("Dates");
-        lineChart.setTitle(graphicPriceDTO.getTitle());
-        series.setName("price from the " + START_DATE + " to the " + FINISH_DATE);
+
+        fullInformationAboutImage(graphicPriceDTO, x, y, lineChart, series);
 
         for (GraphicRowItemDTO o : graphicPriceDTO.getItems()) {
-            series.getData().add(new XYChart.Data<String, Integer>(o.getDate().toString(), o.getPrice()));
+            series.getData().add(new XYChart.Data<String, Integer>(o.getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)), o.getPrice()));
         }
 
         Scene scene = new Scene(lineChart, 600, 600);
@@ -54,8 +50,6 @@ public class JavaFxMain extends Application {
 
     public static void main(String[] args) {
         launch(args);
-
-
     }
 
 
@@ -75,7 +69,9 @@ public class JavaFxMain extends Application {
         int year = 2020;
         int month = (int) (Math.random() * (12 - 1)) + 1;
         int dayOfMonth = (int) (Math.random() * (28 - 1)) + 1;
-        LocalDateTime date = LocalDateTime.of(year, month, dayOfMonth, 12, 12);
+        int hour = (int) (Math.random() * (24 - 1)) + 1;
+        int minute = (int) (Math.random() * (60 - 1)) + 1;
+        LocalDateTime date = LocalDateTime.of(year, month, dayOfMonth, hour, minute);
         return date;
     }
 
@@ -94,7 +90,18 @@ public class JavaFxMain extends Application {
 
         list.sort(Comparator.comparing(GraphicRowItemDTO::getDate));
         graphicPriceDTO.setItems(list);
-        graphicPriceDTO.setTitle("Title name");
+        graphicPriceDTO.setTitle("Good's name");
         return graphicPriceDTO;
+    }
+
+    private static void fullInformationAboutImage(GraphicPriceDTO graphicPriceDTO, CategoryAxis x, NumberAxis y, LineChart lineChart, XYChart.Series series) {
+        GraphicRowItemDTO row = graphicPriceDTO.getItems().get(0);
+        String START_DATE = String.valueOf(row.getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)));
+        row = graphicPriceDTO.getItems().get(5);
+        String FINISH_DATE = String.valueOf(row.getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)));
+        y.setLabel("Price");
+        x.setLabel("Dates");
+        lineChart.setTitle(graphicPriceDTO.getTitle());
+        series.setName("price from the " + START_DATE + " to the " + FINISH_DATE);
     }
 }

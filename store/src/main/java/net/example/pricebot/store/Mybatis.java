@@ -45,6 +45,7 @@ public class Mybatis {
             showAllGoodsFromUserFromDB(session);
             addGoodToHistoryPrice(session);
             showAllHistoryPriceById(session);
+            deleteAll(session);
         } catch (NullPointerException e) {
             System.out.println("Catch nullPointer");
         }
@@ -83,6 +84,12 @@ public class Mybatis {
             System.out.println(entity.toString());
         }
 
+    }
+
+    private static void deleteAll(SqlSession session) {
+        String telegramId = "2837648726";
+        session.update("deleteAll", telegramId);
+        session.commit();
     }
 
 }

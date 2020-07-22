@@ -26,4 +26,8 @@ public interface GoodsInfoMapper {
     @Options(keyColumn = "id", useGeneratedKeys = true)
     void addGood(GoodsInfoModel goodPutIntoDb);
 
+
+    @Update("Update goods_info set is_deleted = true where telegram_user_id = #{telegramUserId}")
+    void deleteAll(@Param("telegramUserId") String telegramUserId);
+
 }
