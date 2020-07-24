@@ -38,13 +38,18 @@ public class GoodsInfoModel {
     @Setter
     private Boolean isDeleted;
 
-    public GoodsInfoModel(String telegramUserId, String providerUrl, String providerType, Boolean isDeleted, LocalDateTime updatedAt, LocalDateTime createdAt) {
+    @Getter
+    @Setter
+    String title;
+
+    public GoodsInfoModel(String telegramUserId, String providerUrl, String providerType, Boolean isDeleted, LocalDateTime updatedAt, LocalDateTime createdAt, String title) {
         this.telegramUserId = telegramUserId;
         this.providerUrl = providerUrl;
         this.providerType = providerType;
         this.isDeleted = isDeleted;
         this.updatedAt = updatedAt;
         this.createdAt = createdAt;
+        this.title = title;
     }
 
     public GoodsInfoModel(Long id, String telegramUserId, String providerUrl, String providerType, LocalDateTime updatedAt, LocalDateTime createdAt, Boolean isDeleted) {
@@ -55,6 +60,21 @@ public class GoodsInfoModel {
         this.updatedAt = updatedAt;
         this.createdAt = createdAt;
         this.isDeleted = isDeleted;
+    }
+
+    public GoodsInfoModel(Long id, String telegramUserId, String providerUrl, String providerType, LocalDateTime updatedAt, LocalDateTime createdAt, Boolean isDeleted, String title) {
+        this.id = id;
+        this.telegramUserId = telegramUserId;
+        this.providerUrl = providerUrl;
+        this.providerType = providerType;
+        this.updatedAt = updatedAt;
+        this.createdAt = createdAt;
+        this.isDeleted = isDeleted;
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     @Override

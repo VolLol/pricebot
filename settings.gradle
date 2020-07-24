@@ -2,4 +2,5 @@ rootProject.name = 'pricebot'
 include 'store'
 include 'graphic'
 include 'harvester'
+include 'core'
 

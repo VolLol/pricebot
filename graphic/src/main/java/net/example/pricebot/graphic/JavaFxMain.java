@@ -16,6 +16,8 @@ import net.example.pricebot.graphic.dto.GraphicRowItemDTO;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -25,7 +27,7 @@ public class JavaFxMain extends Application {
 
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage)  {
         CategoryAxis x = new CategoryAxis();
         NumberAxis y = new NumberAxis();
         LineChart lineChart = new LineChart<>(x, y);
@@ -41,23 +43,25 @@ public class JavaFxMain extends Application {
         Scene scene = new Scene(lineChart, 600, 600);
         lineChart.getData().add(series);
         stage.setScene(scene);
+        stage.close();
 
 
-        stage.show();
         createImage(lineChart);
+
 
     }
 
     public static void main(String[] args) {
         launch(args);
+
     }
 
 
-    private void createImage(LineChart<Number, Number> numberLineChart) {
+    private void createImage(LineChart<Number, Number> numberLineChart)  {
         WritableImage image = numberLineChart.snapshot(new SnapshotParameters(), null);
-        String path = "C:\\Develop\\pricebot\\graphic\\src\\main\\java\\net\\example\\pricebot\\graphic\\Chart.png";
-        File file = new File(path);
         try {
+            Path tmpFile = Files.createTempDirectory("img");
+            File file = new File(tmpFile.toString() + "/Chart.png");
             ImageIO.write(SwingFXUtils.fromFXImage(image, null), "PNG", file);
         } catch (IOException e) {
             e.printStackTrace();

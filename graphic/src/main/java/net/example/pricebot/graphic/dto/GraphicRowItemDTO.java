@@ -1,15 +1,12 @@
 package net.example.pricebot.graphic.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 public class GraphicRowItemDTO {
 
-    @Getter
-    @Setter
     Integer price;
+
+    LocalDateTime date;
 
 
     public Integer getPrice() {
@@ -28,9 +25,8 @@ public class GraphicRowItemDTO {
         this.date = date;
     }
 
-    @Getter
-    @Setter
-    LocalDateTime date;
+    public GraphicRowItemDTO() {
+    }
 
     public GraphicRowItemDTO(Integer price, LocalDateTime date) {
         this.price = price;

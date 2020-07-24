@@ -8,7 +8,7 @@
 *.tar.gz
 *.rar
 /.idea
-/.gradle/
+/.gradle
 /harvester/build/
 /harvester/build/classes/java/main/
 /harvester/build/classes/java/test/

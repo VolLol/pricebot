@@ -1,54 +1,30 @@
 package net.example.pricebot.store;
 
-import net.example.pricebot.store.mappers.GoodsHistoryPriceMapper;
 import net.example.pricebot.store.mappers.GoodsInfoMapper;
 import net.example.pricebot.store.models.GoodsHistoryPriceModel;
 import net.example.pricebot.store.models.GoodsInfoModel;
-import org.apache.ibatis.mapping.Environment;
-import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.apache.ibatis.transaction.TransactionFactory;
-import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
-
-import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Properties;
 
 public class Mybatis {
+    private static String driver = "org.postgresql.Driver";
+    private static String url = "jdbc:postgresql://localhost:5432/pricebotdb";
+    private static String username = "postgres";
+    private static String password = "password";
 
-    private static SqlSessionFactory sqlSessionFactory = null;
 
     public static void main(String[] args) {
-        Properties prop = new Properties();
-        prop.setProperty("driver", "org.postgresql.Driver");
-        prop.setProperty("url", "jdbc:postgresql://localhost:5432/pricebotdb");
-        prop.setProperty("user", "postgres");
-        prop.setProperty("password", "password");
-
-        StoreDataSourceFactory storeDataSourceFactory = new StoreDataSourceFactory();
-        storeDataSourceFactory.setProperties(prop);
-
-
-        DataSource dataSource = storeDataSourceFactory.getDataSource();
-        TransactionFactory transactionFactory = new JdbcTransactionFactory();
-        Environment environment = new Environment("development", transactionFactory, dataSource);
-        Configuration configuration = new Configuration(environment);
-        configuration.addMapper(GoodsInfoMapper.class);
-        configuration.addMapper(GoodsHistoryPriceMapper.class);
-        sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
-
-        try (SqlSession session = sqlSessionFactory.openSession()) {
-            addGoodToDB(session);
-            showAllGoodsFromUserFromDB(session);
-            addGoodToHistoryPrice(session);
-            showAllHistoryPriceById(session);
-            deleteAll(session);
-        } catch (NullPointerException e) {
-            System.out.println("Catch nullPointer");
+        PooledDataSource pooledDataSource = new PooledDataSource(driver, url, username, password);
+        DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
+        SqlSession session = databaseSessionFactory.getSession().openSession();
+        GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
+        List<GoodsInfoModel> goodsList = goodsInfoMapper.getGoodsByTelegramUserId("2837648726");
+        for (GoodsInfoModel model : goodsList) {
+            System.out.println(model.toString());
         }
+
     }
 
 
@@ -60,13 +36,13 @@ public class Mybatis {
     }
 
     private static void addGoodToDB(SqlSession session) {
-        GoodsInfoModel good = new GoodsInfoModel("2837648726",
+     /*   GoodsInfoModel good = new GoodsInfoModel("2837648726",
                 "url here", "TYPE",
                 false,
                 LocalDateTime.now(), LocalDateTime.now());
         session.insert("addGood", good);
         session.commit();
-
+*/
     }
 
 
