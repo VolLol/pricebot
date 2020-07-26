@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+
 }
 
 group 'net.example.pricebot'
@@ -12,9 +15,21 @@ repositories {
 }
 
 dependencies {
-    compile project(':graphic')
-    compile project(':harvester')
-    compile project(':store')
+    javafx {
+        version = "11.0.2"
+        modules = ['javafx.controls']
+    }
+
+    implementation(project(':graphic'))
+    implementation(project(':harvester'))
+    implementation(project(':store'))
+
+    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+mainClassName = 'net.example.pricebot.core.CoreMain'

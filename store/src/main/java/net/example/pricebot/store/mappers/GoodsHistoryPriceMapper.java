@@ -1,22 +1,23 @@
 package net.example.pricebot.store.mappers;
 
-import net.example.pricebot.store.models.GoodsHistoryPriceModel;
+import net.example.pricebot.store.records.GoodsHistoryPriceRecord;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
 public interface GoodsHistoryPriceMapper {
 
-    @Select("Select * from history_price where good_info_id= #{goodInfoId}")
+    @Select("Select * from goods_history_prices where goods_info_id= #{goodsInfoId} order by created_at desc limit 14")
     @Results({
-            @Result(property = "good_info_id", column = "goodInfoId"),
+            @Result(property = "goodsInfoId", column = "goods_info_id"),
             @Result(property = "price", column = "price"),
-            @Result(property = "created_at", column = "createdAt"),
+            @Result(property = "createdAt", column = "created_at"),
     })
-    List<GoodsHistoryPriceModel> getHistoryPriceById(@Param("goodInfoId") Long goodInfoId);
+    List<GoodsHistoryPriceRecord> searchTop14ByGoodsId(@Param("goodsInfoId") Long goodsInfoId);
 
 
-    @Insert("Insert into history_price(good_info_id, price,created_at)" +
-            " values (#{goodInfoId},#{price},#{createdAt})")
-    void addGoodToHistory(GoodsHistoryPriceModel good);
+    @Insert("Insert into goods_history_prices(goods_info_id, price,created_at)" +
+            " values (#{goodsInfoId},#{price},#{createdAt})")
+    void create(GoodsHistoryPriceRecord goodsHistoryPrice);
+
 }

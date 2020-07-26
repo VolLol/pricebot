@@ -1,106 +1,58 @@
 package net.example.pricebot.core;
 
-import net.example.pricebot.graphic.dto.GraphicPriceDTO;
-import net.example.pricebot.graphic.dto.GraphicRowItemDTO;
-import net.example.pricebot.harvester.HarvesterAvito;
-import net.example.pricebot.harvester.dto.GoodsInfoDTO;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
+import net.example.pricebot.core.dto.AnswerDto;
+import net.example.pricebot.core.usecases.*;
+import net.example.pricebot.store.DatabaseMigrationTools;
 import net.example.pricebot.store.DatabaseSessionFactory;
-import net.example.pricebot.store.mappers.GoodsHistoryPriceMapper;
 import net.example.pricebot.store.mappers.GoodsInfoMapper;
-import net.example.pricebot.store.models.GoodsHistoryPriceModel;
-import net.example.pricebot.store.models.GoodsInfoModel;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-public class CoreMain {
-    private static String driver = "org.postgresql.Driver";
+public class CoreMain extends Application {
+    private static final String driver = "org.postgresql.Driver";
     private static String JDBCUrl = "jdbc:postgresql://localhost:5432/pricebotdb";
     private static String username = "postgres";
     private static String password = "password";
-
+    private static final Logger logger = LoggerFactory.getLogger(CoreMain.class);
 
     public static void main(String[] args) throws IOException {
-        String url = "https://www.avito.ru/sankt-peterburg/noutbuki/noutbuk_core_i3_core_i5_core_i7_nvidia_ssd_1925067780";
+        Application.launch(args);
+    }
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        String url = "https://www.avito.ru/sankt-peterburg/noutbuki/noutbuk_asus_shustryy_videokarta_1gb_1958417529";
         String telegramId = "telegram id";
-        Long goodId = 20L;
-
-        preparingDataForCreatingImage(goodId);
+        Long goodId = 3L;
+        DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
+        PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
+        DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
+        SqlSession session = databaseSessionFactory.getSession().openSession();
+        AnswerDto answerAddRecord = AddRecordToDatabaseUsecase.execute(session, url);
+        logger.info(answerAddRecord.toString(), AddRecordToDatabaseUsecase.class);
+        AnswerDto answerShowAll = ShowAllGoodsUsecase.execute(session, telegramId);
+        logger.info(answerShowAll.toString());
+        AnswerDto answerCreateImage = CreateImageUsecase.execute(session, goodId, stage);
+        logger.info(answerCreateImage.toString());
+        Platform.exit();
     }
 
-    private static void addToDatabase(String url) throws IOException {
-        HarvesterAvito harvesterAvito = new HarvesterAvito();
-        GoodsInfoDTO goodsInfoDTO = harvesterAvito.getGoodsInfoByUrl(url);
-        GoodsInfoModel goodsInfoModel = new GoodsInfoModel(
-                "telegram id",
-                url,
-                "AVITO",
-                false,
-                goodsInfoDTO.getUpdateAt(),
-                LocalDateTime.now(),
-                goodsInfoDTO.getTitle()
-        );
+
+    private static Long searchGoodsIdByUrl(String url) {
         PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
         DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
         SqlSession session = databaseSessionFactory.getSession().openSession();
         GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
-        try {
-            goodsInfoMapper.addGood(goodsInfoModel);
-        } catch (Exception e) {
-            System.out.println("Already exist");
-        }
-        session.commit();
-        session.close();
-
+        Long id = goodsInfoMapper.searchGoodByUrl(url);
+        return id;
     }
-
-    private static void showAllFromDBByTelegramId(String telegramId) {
-        PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
-        DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
-        SqlSession session = databaseSessionFactory.getSession().openSession();
-        GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
-        List<GoodsInfoModel> list = goodsInfoMapper.getGoodsByTelegramUserId(telegramId);
-        if (!list.isEmpty()) {
-            for (GoodsInfoModel model : list) {
-                System.out.println(model.toString());
-            }
-        } else {
-            System.out.println("You have no goods");
-        }
-        session.close();
-    }
-
-    private static void preparingDataForCreatingImage(Long goodId) {
-        PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
-        DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
-        SqlSession session = databaseSessionFactory.getSession().openSession();
-        GoodsHistoryPriceMapper goodsHistoryPriceMapper = session.getMapper(GoodsHistoryPriceMapper.class);
-        try {
-
-            List<GoodsHistoryPriceModel> goodsHistoryPriceList = goodsHistoryPriceMapper.getHistoryPriceById(goodId);
-            List<GraphicRowItemDTO> graphicRowItemList = new ArrayList<>();
-            GraphicRowItemDTO row = new GraphicRowItemDTO();
-            for (GoodsHistoryPriceModel model : goodsHistoryPriceList) {
-                row.setDate(model.getCreatedAt());
-                row.setPrice(model.getPrice());
-                graphicRowItemList.add(row);
-            }
-            GraphicPriceDTO graphicPriceDTO = new GraphicPriceDTO();
-            GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
-            GoodsInfoModel goodsInfoModel = goodsInfoMapper.getGoodById(goodId);
-            graphicPriceDTO.setTitle(goodsInfoModel.getTitle());
-            graphicPriceDTO.setItems(graphicRowItemList);
-
-        } catch (NullPointerException e) {
-            System.out.println("Good with id = " + goodId + " not exist");
-        }
-
-    }
-
 
 }

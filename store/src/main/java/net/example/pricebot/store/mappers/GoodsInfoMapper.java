@@ -1,6 +1,6 @@
 package net.example.pricebot.store.mappers;
 
-import net.example.pricebot.store.models.GoodsInfoModel;
+import net.example.pricebot.store.records.GoodsInfoRecord;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -12,36 +12,40 @@ public interface GoodsInfoMapper {
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "telegramUserId", column = "telegram_user_id"),
+            @Result(property = "title",column = "title"),
             @Result(property = "providerUrl", column = "provider_url"),
             @Result(property = "providerType", column = "provider_type"),
             @Result(property = "createdAt", column = "create_at"),
             @Result(property = "updatedAt", column = "update_at"),
-            @Result(property = "isDeleted",column = "is_deleted"),
-            @Result(property = "title",column = "title")
+            @Result(property = "isDeleted",column = "is_deleted")
     })
-    List<GoodsInfoModel> getGoodsByTelegramUserId(@Param("telegramUserId") String telegramUserId);
+    List<GoodsInfoRecord> searchByTelegramUserId(@Param("telegramUserId") String telegramUserId);
 
 
-    @Insert("Insert into goods_info(telegram_user_id,provider_url,provider_type,create_at,update_at,title)" +
-            " values (#{telegramUserId},#{providerUrl},#{providerType},#{createdAt},#{updatedAt},#{title})")
+    @Insert("Insert into goods_info(telegram_user_id,title,provider_url,provider_type,create_at,update_at)" +
+            " values (#{telegramUserId},#{title},#{providerUrl},#{providerType},#{createdAt},#{updatedAt})")
     @Options(keyColumn = "id", useGeneratedKeys = true)
-    void addGood(GoodsInfoModel goodsInfoModel);
+    void create(GoodsInfoRecord goodsInfoRecord);
 
 
     @Update("Update goods_info set is_deleted = true where telegram_user_id = #{telegramUserId}")
     void deleteAll(@Param("telegramUserId") String telegramUserId);
 
-    @Select("Select * from goods_info where id= #{id} and is_deleted=false")
+    @Select("Select * from goods_info where id= #{id} and is_deleted=false limit 1")
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "telegramUserId", column = "telegram_user_id"),
+            @Result(property = "title",column = "title"),
             @Result(property = "providerUrl", column = "provider_url"),
             @Result(property = "providerType", column = "provider_type"),
             @Result(property = "createdAt", column = "create_at"),
             @Result(property = "updatedAt", column = "update_at"),
-            @Result(property = "isDeleted",column = "is_deleted"),
-            @Result(property = "title",column = "title")
+            @Result(property = "isDeleted",column = "is_deleted")
     })
-    GoodsInfoModel getGoodById(@Param("id") Long id);
+    GoodsInfoRecord getById(@Param("id") Long id);
+
+
+    @Select("Select id from goods_info where provider_url= #{url}")
+    Long searchGoodByUrl(@Param("url") String url);
 
 }

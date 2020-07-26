@@ -8,6 +8,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -22,7 +24,9 @@ public class HarvesterAvito implements IHarvester {
 
     @Override
     public GoodsInfoDTO getGoodsInfoByUrl(String url) throws IOException {
-        webPage = Jsoup.connect(url).get();
+        //  webPage = Jsoup.connect(url).get();
+        InputStream inStream = new URL(url).openStream();
+        webPage = Jsoup.parse(inStream, "UTF-8", url);
         GoodsInfoDTO goodsInfoDTO = GoodsInfoDTO.builder()
                 .title(getTitle())
                 .price(getPrice())
@@ -35,15 +39,12 @@ public class HarvesterAvito implements IHarvester {
 
     private String getTitle() {
         Elements elementTitle = webPage.select("span.title-info-title-text");
-        byte[] bytesTitle = elementTitle.text().getBytes(StandardCharsets.UTF_8);
-        String stringTitle = new String(bytesTitle);
-        return stringTitle;
+        return elementTitle.text();
     }
 
     private Integer getPrice() {
         Elements elementsPrice = webPage.select("span.js-item-price");
-        byte[] bytesPrice = elementsPrice.get(0).text().getBytes(StandardCharsets.UTF_8);
-        String stringPrice = new String(bytesPrice);
+        String stringPrice = elementsPrice.get(0).text();
         stringPrice = stringPrice.replace(" ", "");
         Integer price = Integer.valueOf(stringPrice);
         return price;
@@ -51,36 +52,26 @@ public class HarvesterAvito implements IHarvester {
 
     private LocalDateTime getUpdateAt() {
         Elements elementsDate = webPage.select("div.title-info-metadata-item-redesign");
-        byte[] bytesDate = elementsDate.text().getBytes(StandardCharsets.UTF_8);
-        String stringDate = new String(bytesDate);
+        String stringDate = elementsDate.text();
         int year = Year.now().getValue();
         int month = 10;
         int day = 0;
         int hour = 0;
         int minute = 0;
-        Pattern partlyDatePattern = Pattern.compile("^\\D+(\\d+)\\:(\\d+)");
+        List<String> dateAsList = Arrays.asList(stringDate.split(" "));
         if (stringDate.contains("сегодня")) {
             month = LocalDateTime.now().getMonthValue();
             day = LocalDateTime.now().getDayOfMonth();
-            Matcher matcher = partlyDatePattern.matcher(stringDate);
-            if (matcher.matches()) {
-                String stringhour = matcher.group(1);
-                hour = Integer.parseInt(stringhour);
-                String stringMinute = matcher.group(2);
-                minute = Integer.parseInt(stringMinute);
-            }
+            List<String> timeAsList = Arrays.asList(dateAsList.get(2).split(":"));
+            hour = Integer.parseInt(timeAsList.get(0));
+            minute = Integer.parseInt(timeAsList.get(1));
         }
         if (stringDate.contains("вчера")) {
             month = LocalDateTime.now().getMonthValue();
             day = LocalDateTime.now().getDayOfMonth() - 1;
-            Matcher matcher = partlyDatePattern.matcher(stringDate);
-            if (matcher.matches()) {
-                String stringHour = matcher.group(1);
-                hour = Integer.parseInt(stringHour);
-                String stringMinute = matcher.group(2);
-                minute = Integer.parseInt(stringMinute);
-            }
-        }
+            List<String> timeAsList = Arrays.asList(dateAsList.get(2).split(":"));
+            hour = Integer.parseInt(timeAsList.get(0));
+            minute = Integer.parseInt(timeAsList.get(1));        }
 
         if (!(stringDate.contains("сегодня")) && !stringDate.contains("вчера")) {
             List<String> listDate = Arrays.asList(stringDate.split(" "));
