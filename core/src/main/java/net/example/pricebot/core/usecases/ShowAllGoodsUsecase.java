@@ -1,7 +1,6 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.dto.AnswerDto;
-import net.example.pricebot.core.dto.AnswerEnum;
+import net.example.pricebot.core.dto.ShowAllAnswer;
 import net.example.pricebot.store.mappers.GoodsInfoMapper;
 import net.example.pricebot.store.records.GoodsInfoRecord;
 import org.apache.ibatis.session.SqlSession;
@@ -13,18 +12,22 @@ import java.util.List;
 public class ShowAllGoodsUsecase {
     private static final Logger logger = LoggerFactory.getLogger(ShowAllGoodsUsecase.class);
 
-    public static AnswerDto execute(SqlSession session, String telegramId) {
+    public static ShowAllAnswer execute(SqlSession session, String telegramId) {
+        ShowAllAnswer answer = new ShowAllAnswer();
+
         GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
-        List<GoodsInfoRecord> list = goodsInfoMapper.searchByTelegramUserId(telegramId);
-        if (!list.isEmpty()) {
+
+        List<GoodsInfoRecord> records = goodsInfoMapper.searchByTelegramUserId(telegramId);
+
+        if (!records.isEmpty()) {
             logger.info("The user " + telegramId + " has following goods: ");
-            for (GoodsInfoRecord model : list) {
+            for (GoodsInfoRecord model : records) {
                 logger.info(model.toString());
             }
-            return AnswerDto.builder().answerEnum(AnswerEnum.SUCCESSFUL).build();
+            answer.setAllRecords(records);
         } else {
             logger.info("The user " + telegramId + " has no goods");
-            return AnswerDto.builder().answerEnum(AnswerEnum.UNSUCCESSFUL).build();
         }
+        return answer;
     }
 }

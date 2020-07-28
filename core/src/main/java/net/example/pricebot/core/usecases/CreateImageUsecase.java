@@ -1,9 +1,7 @@
 package net.example.pricebot.core.usecases;
 
-import javafx.scene.chart.Chart;
 import javafx.stage.Stage;
-import net.example.pricebot.core.dto.AnswerDto;
-import net.example.pricebot.core.dto.AnswerEnum;
+import net.example.pricebot.core.dto.CreateImageAnswer;
 import net.example.pricebot.graphic.ChartTool;
 import net.example.pricebot.graphic.dto.ChartPriceDTO;
 import net.example.pricebot.graphic.dto.ChartRowItemDTO;
@@ -25,20 +23,22 @@ import java.util.List;
 public class CreateImageUsecase {
     private static final Logger logger = LoggerFactory.getLogger(CreateImageUsecase.class);
     private static ChartPriceDTO chartPriceDTO;
+    private static File image;
 
-    public static AnswerDto execute(SqlSession session, Long goodId, Stage stage) {
-        AnswerDto answerPreparingDate = preparingDate(session, goodId);
-        AnswerDto answerDrawChart = drawChart(stage);
-        if (answerPreparingDate.getAnswerEnum().equals(AnswerEnum.SUCCESSFUL)
-                & answerDrawChart.getAnswerEnum().equals(AnswerEnum.SUCCESSFUL)
-        ) {
-            return AnswerDto.builder().answerEnum(AnswerEnum.SUCCESSFUL).build();
-        } else {
-            return AnswerDto.builder().answerEnum(AnswerEnum.UNSUCCESSFUL).build();
+    public static CreateImageAnswer execute(SqlSession session, Long goodId, Stage stage) {
+        CreateImageAnswer answer = new CreateImageAnswer();
+        preparingDate(session, goodId);
+        try {
+            image = drawChart(stage);
+            answer.setImage(image);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        answer.setImage(image);
+        return answer;
     }
 
-    private static AnswerDto preparingDate(SqlSession session, Long goodId) {
+    private static void preparingDate(SqlSession session, Long goodId) {
         GoodsHistoryPriceMapper goodsHistoryPriceMapper = session.getMapper(GoodsHistoryPriceMapper.class);
         try {
             List<GoodsHistoryPriceRecord> goodsHistoryPriceList = goodsHistoryPriceMapper.searchTop14ByGoodsId(goodId);
@@ -62,21 +62,15 @@ public class CreateImageUsecase {
                     .finishAt(LocalDateTime.now())
                     .build();
             logger.info("Good with id = " + goodId + " exist. Starting to generate an image");
-            return AnswerDto.builder().answerEnum(AnswerEnum.SUCCESSFUL).build();
         } catch (NullPointerException e) {
             logger.info("Good with id = " + goodId + " not exist");
-            return AnswerDto.builder().answerEnum(AnswerEnum.UNSUCCESSFUL).build();
         }
     }
 
-    private static AnswerDto drawChart(Stage stage) {
-        try {
-            File image = ChartTool.draw(stage, chartPriceDTO);
-            logger.info(image.getAbsolutePath());
-            return AnswerDto.builder().answerEnum(AnswerEnum.SUCCESSFUL).build();
-        } catch (IOException e) {
-            return AnswerDto.builder().answerEnum(AnswerEnum.UNSUCCESSFUL).build();
-        }
+    private static File drawChart(Stage stage) throws IOException {
 
+        File image = ChartTool.draw(stage, chartPriceDTO);
+        logger.info(image.getAbsolutePath());
+        return image;
     }
 }

@@ -4,6 +4,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import net.example.pricebot.core.dto.AnswerDto;
+import net.example.pricebot.core.dto.CreateImageAnswer;
+import net.example.pricebot.core.dto.ShowAllAnswer;
 import net.example.pricebot.core.usecases.*;
 import net.example.pricebot.store.DatabaseMigrationTools;
 import net.example.pricebot.store.DatabaseSessionFactory;
@@ -38,9 +40,9 @@ public class CoreMain extends Application {
         SqlSession session = databaseSessionFactory.getSession().openSession();
         AnswerDto answerAddRecord = AddRecordToDatabaseUsecase.execute(session, url);
         logger.info(answerAddRecord.toString(), AddRecordToDatabaseUsecase.class);
-        AnswerDto answerShowAll = ShowAllGoodsUsecase.execute(session, telegramId);
-        logger.info(answerShowAll.toString());
-        AnswerDto answerCreateImage = CreateImageUsecase.execute(session, goodId, stage);
+        ShowAllAnswer showAllAnswer = ShowAllGoodsUsecase.execute(session, telegramId);
+        logger.info(showAllAnswer.toString());
+        CreateImageAnswer answerCreateImage = CreateImageUsecase.execute(session, goodId, stage);
         logger.info(answerCreateImage.toString());
         Platform.exit();
     }
@@ -51,8 +53,7 @@ public class CoreMain extends Application {
         DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
         SqlSession session = databaseSessionFactory.getSession().openSession();
         GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
-        Long id = goodsInfoMapper.searchGoodByUrl(url);
-        return id;
+        return goodsInfoMapper.searchGoodByUrl(url);
     }
 
 }
