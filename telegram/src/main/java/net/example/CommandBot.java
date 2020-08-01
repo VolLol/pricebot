@@ -5,9 +5,14 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +25,8 @@ public class CommandBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         SendMessage answer = new SendMessage();
+        ReplyKeyboardMarkup commandsButton = generateKeyboard();
+        answer.setReplyMarkup(commandsButton);
         answer.setChatId(update.getMessage().getChatId());
         if (update.hasMessage()) {
             Message message = update.getMessage();
@@ -135,4 +142,22 @@ public class CommandBot extends TelegramLongPollingBot {
     }
 
 
+    private ReplyKeyboardMarkup generateKeyboard() {
+        KeyboardRow firstRow = new KeyboardRow();
+        firstRow.add("/add");
+        firstRow.add("/showall");
+        KeyboardRow secondRow = new KeyboardRow();
+        secondRow.add("/deleteall");
+        secondRow.add("/help");
+        KeyboardRow thirdRow = new KeyboardRow();
+        thirdRow.add("/showdiagram");
+        ReplyKeyboardMarkup commandsButton = new ReplyKeyboardMarkup();
+        commandsButton.setOneTimeKeyboard(true);
+        List<KeyboardRow> rows = new ArrayList<>();
+        rows.add(firstRow);
+        rows.add(secondRow);
+        rows.add(thirdRow);
+        commandsButton.setKeyboard(rows);
+        return commandsButton;
+    }
 }
