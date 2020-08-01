@@ -34,7 +34,7 @@ public class CoreMain extends Application {
         String url = "https://www.avito.ru/sankt-peterburg/noutbuki/noutbuk_asus_shustryy_videokarta_1gb_1958417529";
         String telegramId = "telegram id";
         Long goodId = 3L;
-        DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
+       /* DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
         PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
         DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
         SqlSession session = databaseSessionFactory.getSession().openSession();
@@ -43,7 +43,9 @@ public class CoreMain extends Application {
         ShowAllAnswer showAllAnswer = ShowAllGoodsUsecase.execute(session, telegramId);
         logger.info(showAllAnswer.toString());
         CreateImageAnswer answerCreateImage = CreateImageUsecase.execute(session, goodId, stage);
-        logger.info(answerCreateImage.toString());
+        logger.info(answerCreateImage.toString());*/
+        String token = "1316018547:AAEZJSOHn8I7OXhUL1TBmi6GhwXUyyI6vtc";
+
         Platform.exit();
     }
 
