@@ -1,6 +1,7 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.dto.AnswerDto;
+import net.example.pricebot.core.dto.AddRecordAnswerEntity;
+import net.example.pricebot.core.dto.CommonAnswerEntity;
 import net.example.pricebot.core.dto.AnswerEnum;
 import net.example.pricebot.harvester.HarvesterAvito;
 import net.example.pricebot.harvester.dto.GoodsInfoDTO;
@@ -13,15 +14,17 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class AddRecordToDatabaseUsecase {
-    private static final Logger logger = LoggerFactory.getLogger(AddRecordToDatabaseUsecase.class);
+public class AddRecordUsecase {
+    private static final Logger logger = LoggerFactory.getLogger(AddRecordUsecase.class);
 
-    public static AnswerDto execute(SqlSession session, String url) throws IOException {
+    public static CommonAnswerEntity execute(SqlSession session, Long telegramUserId, String url) throws IOException {
+        CommonAnswerEntity answer = new AddRecordAnswerEntity();
         HarvesterAvito harvesterAvito = new HarvesterAvito();
         GoodsInfoDTO goodsInfoDTO = harvesterAvito.getGoodsInfoByUrl(url);
         GoodsInfoRecord goodsInfoRecord = GoodsInfoRecord.builder()
-                .telegramUserId("telegram id")
+                .telegramUserId(telegramUserId.toString())
                 .title(goodsInfoDTO.getTitle())
+                .price(goodsInfoDTO.getPrice())
                 .providerType("AVITO")
                 .isDeleted(false)
                 .createdAt(LocalDateTime.now())
@@ -32,14 +35,16 @@ public class AddRecordToDatabaseUsecase {
         try {
             goodsInfoMapper.create(goodsInfoRecord);
             logger.info("Adding record successfully: " + goodsInfoRecord.toString());
-            return AnswerDto.builder().answerEnum(AnswerEnum.SUCCESSFUL).build();
-
+            answer.setMessageForUser("This good add to the watchlist");
+            answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
+            return answer;
         } catch (Exception e) {
             logger.info("Error while adding record");
-            return AnswerDto.builder().answerEnum(AnswerEnum.UNSUCCESSFUL).build();
+            answer.setAnswerEnum(AnswerEnum.UNSUCCESSFUL);
+            answer.setMessageForUser("This goods is already on watchlist");
+            return answer;
         } finally {
             session.commit();
         }
-
     }
 }

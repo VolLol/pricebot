@@ -18,7 +18,11 @@ public class GoodsInfoRecord {
 
     @Getter
     @Setter
-    String title;
+    private String title;
+
+    @Getter
+    @Setter
+    private Integer price;
 
     @Getter
     @Setter

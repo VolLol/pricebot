@@ -12,18 +12,19 @@ public interface GoodsInfoMapper {
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "telegramUserId", column = "telegram_user_id"),
-            @Result(property = "title",column = "title"),
+            @Result(property = "price", column = "price"),
+            @Result(property = "title", column = "title"),
             @Result(property = "providerUrl", column = "provider_url"),
             @Result(property = "providerType", column = "provider_type"),
             @Result(property = "createdAt", column = "create_at"),
             @Result(property = "updatedAt", column = "update_at"),
-            @Result(property = "isDeleted",column = "is_deleted")
+            @Result(property = "isDeleted", column = "is_deleted")
     })
     List<GoodsInfoRecord> searchByTelegramUserId(@Param("telegramUserId") String telegramUserId);
 
 
-    @Insert("Insert into goods_info(telegram_user_id,title,provider_url,provider_type,create_at,update_at)" +
-            " values (#{telegramUserId},#{title},#{providerUrl},#{providerType},#{createdAt},#{updatedAt})")
+    @Insert("Insert into goods_info(telegram_user_id,title,price,provider_url,provider_type,create_at,update_at)" +
+            " values (#{telegramUserId},#{title},#{price},#{providerUrl},#{providerType},#{createdAt},#{updatedAt})")
     @Options(keyColumn = "id", useGeneratedKeys = true)
     void create(GoodsInfoRecord goodsInfoRecord);
 
@@ -35,12 +36,13 @@ public interface GoodsInfoMapper {
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "telegramUserId", column = "telegram_user_id"),
-            @Result(property = "title",column = "title"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "price", column = "price"),
             @Result(property = "providerUrl", column = "provider_url"),
             @Result(property = "providerType", column = "provider_type"),
             @Result(property = "createdAt", column = "create_at"),
             @Result(property = "updatedAt", column = "update_at"),
-            @Result(property = "isDeleted",column = "is_deleted")
+            @Result(property = "isDeleted", column = "is_deleted")
     })
     GoodsInfoRecord getById(@Param("id") Long id);
 

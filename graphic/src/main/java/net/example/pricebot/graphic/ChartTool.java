@@ -1,12 +1,10 @@
 package net.example.pricebot.graphic;
 
+
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 import net.example.pricebot.graphic.dto.ChartPriceDTO;
@@ -32,7 +30,6 @@ public class ChartTool {
             x.setLabel("Dates");
             lineChart.setTitle(chartPriceDTO.getTitle());
             series.setName("price from the " + chartPriceDTO.getStartAtAsStringDate() + " to the " + chartPriceDTO.getFinishAtAsStringDate());
-
             for (ChartRowItemDTO row : chartPriceDTO.getItems()) {
                 series.getData().add(new XYChart.Data<>(row.getDateAsString(), row.getPrice()));
             }

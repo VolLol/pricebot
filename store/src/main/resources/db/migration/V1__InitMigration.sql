@@ -6,13 +6,14 @@ create table goods_history_prices
 );
 
 create index goods_history_prices_main
-    on goods_history_prices(goods_info_id,created_at);
+    on goods_history_prices (goods_info_id, created_at);
 
 create table goods_info
 (
     id               bigserial             not null,
     telegram_user_id varchar               not null,
     title            varchar               not null,
+    price            decimal               not null,
     provider_url     varchar               not null,
     provider_type    varchar               not null,
     create_at        timestamp             not null,

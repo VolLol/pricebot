@@ -7,7 +7,11 @@ import net.example.pricebot.store.records.GoodsInfoRecord;
 import java.util.List;
 
 
-public class ShowAllAnswer {
+public class ShowAllAnswerEntity {
+
+    @Getter
+    @Setter
+    private String titleMessage;
 
     @Getter
     @Setter

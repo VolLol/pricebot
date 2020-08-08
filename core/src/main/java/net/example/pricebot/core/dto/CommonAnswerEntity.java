@@ -1,14 +1,16 @@
 package net.example.pricebot.core.dto;
 
+
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
-
-public class CreateImageAnswer {
+public class CommonAnswerEntity {
 
     @Getter
     @Setter
-    private File image;
+    AnswerEnum answerEnum;
 
+    @Setter
+    @Getter
+    String messageForUser;
 }
