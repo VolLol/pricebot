@@ -14,9 +14,6 @@ import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
-
-import java.io.IOException;
-
 public class CoreMain extends Application {
     private static final Logger logger = LoggerFactory.getLogger(CoreMain.class);
     private static final String driver = "org.postgresql.Driver";
@@ -24,7 +21,7 @@ public class CoreMain extends Application {
     private static String username = "postgres";
     private static String password = "password";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         Application.launch(args);
     }
 
@@ -34,16 +31,14 @@ public class CoreMain extends Application {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
         DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
         PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
+        pooledDataSource.setDefaultAutoCommit(true);
         DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
         SqlSession session = databaseSessionFactory.getSession().openSession();
         try {
-            telegramBotsApi.registerBot(new TelegramPriceBotProcessor(session,stage));
+            telegramBotsApi.registerBot(new TelegramPriceBotProcessor(session));
+            logger.info("The bot was successfully launched");
         } catch (TelegramApiRequestException e) {
             e.printStackTrace();
         }
-
-        Platform.exit();
     }
-
-
 }

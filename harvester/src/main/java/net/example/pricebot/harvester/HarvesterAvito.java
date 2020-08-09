@@ -24,16 +24,14 @@ public class HarvesterAvito implements IHarvester {
 
     @Override
     public GoodsInfoDTO getGoodsInfoByUrl(String url) throws IOException {
-        //  webPage = Jsoup.connect(url).get();
         InputStream inStream = new URL(url).openStream();
         webPage = Jsoup.parse(inStream, "UTF-8", url);
-        GoodsInfoDTO goodsInfoDTO = GoodsInfoDTO.builder()
+        return GoodsInfoDTO.builder()
                 .title(getTitle())
                 .price(getPrice())
                 .updateAt(getUpdateAt())
                 .provider(GoodsInfoProvider.AVITO)
                 .build();
-        return goodsInfoDTO;
     }
 
 
@@ -46,8 +44,7 @@ public class HarvesterAvito implements IHarvester {
         Elements elementsPrice = webPage.select("span.js-item-price");
         String stringPrice = elementsPrice.get(0).text();
         stringPrice = stringPrice.replace(" ", "");
-        Integer price = Integer.valueOf(stringPrice);
-        return price;
+        return Integer.valueOf(stringPrice);
     }
 
     private LocalDateTime getUpdateAt() {
@@ -71,7 +68,8 @@ public class HarvesterAvito implements IHarvester {
             day = LocalDateTime.now().getDayOfMonth() - 1;
             List<String> timeAsList = Arrays.asList(dateAsList.get(2).split(":"));
             hour = Integer.parseInt(timeAsList.get(0));
-            minute = Integer.parseInt(timeAsList.get(1));        }
+            minute = Integer.parseInt(timeAsList.get(1));
+        }
 
         if (!(stringDate.contains("сегодня")) && !stringDate.contains("вчера")) {
             List<String> listDate = Arrays.asList(stringDate.split(" "));

@@ -14,12 +14,8 @@ import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
-import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,71 +23,66 @@ import java.util.List;
 
 public class ShowDiagramUsecase {
     private static final Logger logger = LoggerFactory.getLogger(ShowDiagramUsecase.class);
-    private static ChartPriceDTO chartPriceDTO;
-    private static File image;
-    private static CreateImageAnswerEntity answer = new CreateImageAnswerEntity();
+    private final SqlSession session;
 
-    public ShowDiagramUsecase() {
+    public ShowDiagramUsecase(SqlSession session) {
+        this.session = session;
     }
 
-    public static CreateImageAnswerEntity execute(SqlSession session, Stage stage, String goodId) {
-        preparingDate(session, Long.valueOf(goodId));
-        image = drawChart(stage);
-        answer.setImage(image);
-        answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
-        answer.setMessageForUser("It is giagram for good with id " + goodId);
-
+    public CreateImageAnswerEntity execute(String goodId) {
+        logger.info("Start execute show diagram usecase");
+        CreateImageAnswerEntity answer = new CreateImageAnswerEntity();
+        try {
+            ChartPriceDTO chartPriceDTO = preparingDate(Long.valueOf(goodId));
+            File image = ChartTool.draw(chartPriceDTO);
+            answer.setImage(image);
+            answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
+            answer.setMessageForUser("It is diagram for good with id " + goodId);
+            logger.info("Successful execution diagram usecase");
+        } catch (IOException e) {
+            answer.setAnswerEnum(AnswerEnum.UNSUCCESSFUL);
+            logger.info("Problems with IO while plotting");
+            answer.setMessageForUser("There is no possibility to build a diagram");
+        } catch (NullPointerException e) {
+            logger.info("Goods with id = " + goodId + " not exist");
+            answer.setAnswerEnum(AnswerEnum.UNSUCCESSFUL);
+            answer.setMessageForUser("Goods with id = " + goodId + " not exist");
+        }
         return answer;
     }
 
-    private static void preparingDate(SqlSession session, Long goodId) {
+    private ChartPriceDTO preparingDate(Long goodId) {
         GoodsHistoryPriceMapper goodsHistoryPriceMapper = session.getMapper(GoodsHistoryPriceMapper.class);
-        try {
-            List<GoodsHistoryPriceRecord> goodsHistoryPriceList = goodsHistoryPriceMapper.searchTop14ByGoodsId(goodId);
-            if (!goodsHistoryPriceList.isEmpty()) {
-                List<ChartRowItemDTO> graphicRowItemList = new ArrayList<>();
-                ChartRowItemDTO row;
-                for (GoodsHistoryPriceRecord model : goodsHistoryPriceList) {
-                    row = ChartRowItemDTO.builder()
-                            .date(model.getCreatedAt())
-                            .price(model.getPrice())
-                            .build();
-                    graphicRowItemList.add(row);
-                }
-                graphicRowItemList.sort(Comparator.comparing(ChartRowItemDTO::getDate));
-                LocalDateTime firstDate = graphicRowItemList.get(0).getDate();
-                LocalDateTime lastDate = graphicRowItemList.get(graphicRowItemList.size() - 1).getDate();
-
-                GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
-                GoodsInfoRecord goodsInfoRecord = goodsInfoMapper.getById(goodId);
-
-                chartPriceDTO = ChartPriceDTO.builder()
-                        .title(goodsInfoRecord.getTitle())
-                        .items(graphicRowItemList)
-                        .startAt(firstDate)
-                        .finishAt(lastDate)
+        List<GoodsHistoryPriceRecord> goodsHistoryPriceList = goodsHistoryPriceMapper.searchTop14ByGoodsId(goodId);
+        if (!goodsHistoryPriceList.isEmpty()) {
+            List<ChartRowItemDTO> graphicRowItemList = new ArrayList<>();
+            ChartRowItemDTO row;
+            for (GoodsHistoryPriceRecord model : goodsHistoryPriceList) {
+                row = ChartRowItemDTO.builder()
+                        .date(model.getCreatedAt())
+                        .price(model.getPrice())
                         .build();
-                logger.info("Finished preparing data goods with id = " + goodId + ". Starting to generate an image");
-            } else {
-                answer.setMessageForUser("Not enough information for plotting");
+                graphicRowItemList.add(row);
             }
-        } catch (NullPointerException e) {
-            logger.info("Good with id = " + goodId + " not exist");
-        }
-    }
+            graphicRowItemList.sort(Comparator.comparing(ChartRowItemDTO::getDate));
+            LocalDateTime firstDate = graphicRowItemList.get(0).getDate();
+            LocalDateTime lastDate = graphicRowItemList.get(graphicRowItemList.size() - 1).getDate();
 
-    private static File drawChart(Stage stage) {
-        try {
-            image = ChartTool.draw(stage, chartPriceDTO);
-            Path tmpFile = Files.createTempDirectory("img");
-            File file = new File(tmpFile.toString() + "/Chart.png");
-            ImageIO.write((RenderedImage) image, "PNG", file);
-            logger.info("Finished generating the image");
-            return image;
-        } catch (IOException e) {
-            e.printStackTrace();
+            GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
+            GoodsInfoRecord goodsInfoRecord = goodsInfoMapper.getById(goodId);
+
+            ChartPriceDTO chartPriceDTO = ChartPriceDTO.builder()
+                    .title(goodsInfoRecord.getTitle())
+                    .items(graphicRowItemList)
+                    .startAt(firstDate)
+                    .finishAt(lastDate)
+                    .build();
+            logger.info("Finished preparing data goods with id = " + goodId + ". Starting to generate an image");
+            return chartPriceDTO;
+        } else {
+            logger.info("Goods with id = " + goodId + " not exist");
+            throw new NullPointerException();
         }
-        return image;
     }
 
 }
