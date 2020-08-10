@@ -1,7 +1,6 @@
 package net.example.pricebot.core.processors;
 
 import net.example.pricebot.core.BotConfig;
-import net.example.pricebot.core.ProcessorState;
 import net.example.pricebot.core.answerEntityes.*;
 import net.example.pricebot.core.usecases.*;
 import net.example.pricebot.core.utils.KeyboardFactory;

@@ -1,4 +1,4 @@
-package net.example.pricebot.core;
+package net.example.pricebot.core.processors;
 
 public enum ProcessorState {
     NONE,

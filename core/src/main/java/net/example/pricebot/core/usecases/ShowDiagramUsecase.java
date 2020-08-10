@@ -34,7 +34,6 @@ public class ShowDiagramUsecase {
         DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
         PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
         DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
-        pooledDataSource.setDefaultAutoCommit(true);
         session = databaseSessionFactory.getSession().openSession();
     }
 
@@ -85,6 +84,7 @@ public class ShowDiagramUsecase {
                     .finishAt(lastDate)
                     .build();
             logger.info("Finished preparing data goods with id = " + goodId + ". Starting to generate an image");
+            session.close();
             return chartPriceDTO;
         } else {
             logger.info("Goods with id = " + goodId + " not exist");

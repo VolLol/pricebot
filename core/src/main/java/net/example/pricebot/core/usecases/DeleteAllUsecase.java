@@ -23,7 +23,6 @@ public class DeleteAllUsecase {
     public DeleteAllUsecase() {
         DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
         PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
-        pooledDataSource.setDefaultAutoCommit(true);
         DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
         session = databaseSessionFactory.getSession().openSession();
     }
@@ -33,6 +32,7 @@ public class DeleteAllUsecase {
         DeleteAllAnswerEntity answer = new DeleteAllAnswerEntity();
         GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
         goodsInfoMapper.deleteAll(telegramUserId);
+        session.commit();
         session.close();
         answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
         answer.setMessageForUser("Watchlist has been cleared");

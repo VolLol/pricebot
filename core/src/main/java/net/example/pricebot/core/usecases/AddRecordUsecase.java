@@ -31,7 +31,6 @@ public class AddRecordUsecase {
         DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
         PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
         DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
-        pooledDataSource.setDefaultAutoCommit(true);
         session = databaseSessionFactory.getSession().openSession();
     }
 
@@ -69,6 +68,7 @@ public class AddRecordUsecase {
                 logger.info("Adding record successfully");
                 answer.setMessageForUser("This good add to the watchlist");
                 answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
+                session.commit();
                 session.close();
             } catch (Exception e) {
                 logger.info("This goods has already been added to the watchlist");

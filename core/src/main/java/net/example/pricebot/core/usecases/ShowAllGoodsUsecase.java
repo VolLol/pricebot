@@ -26,8 +26,6 @@ public class ShowAllGoodsUsecase {
         PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
         DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
         session = databaseSessionFactory.getSession().openSession();
-        pooledDataSource.setDefaultAutoCommit(true);
-
     }
 
 
