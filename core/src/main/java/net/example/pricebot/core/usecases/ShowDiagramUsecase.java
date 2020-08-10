@@ -37,11 +37,11 @@ public class ShowDiagramUsecase {
         session = databaseSessionFactory.getSession().openSession();
     }
 
-    public CreateImageAnswerEntity execute(String goodId) {
+    public CreateImageAnswerEntity execute(Long goodId) {
         logger.info("Start execute show diagram usecase");
         CreateImageAnswerEntity answer = new CreateImageAnswerEntity();
         try {
-            ChartPriceDTO chartPriceDTO = preparingDate(Long.valueOf(goodId));
+            ChartPriceDTO chartPriceDTO = preparingDate(goodId);
             File image = ChartTool.draw(chartPriceDTO);
             answer.setImage(image);
             answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);

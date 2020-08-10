@@ -20,71 +20,51 @@ import java.util.Map;
 public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(TelegramPriceBotProcessor.class);
     private Map<Long, ProcessorState> chatStateMap = new HashMap<>();
-    private CommonAnswerEntity commonAnswerEntity;
 
     @Override
     public void onUpdateReceived(Update update) {
-        SendMessage answer = new SendMessage();
-        Long chatId;
         if (update.hasCallbackQuery()) {
-            chatId = Long.valueOf(update.getCallbackQuery().getFrom().getId());
-            isItFirstTime(chatId, answer);
-            if (update.getCallbackQuery().getData().equals("yes") &&
-                    chatStateMap.get(chatId).equals(ProcessorState.DELETE_ALL_WAIT_ANSWER)) {
-                commonAnswerEntity = new DeleteAllUsecase().execute(chatId);
-                answer.setText(commonAnswerEntity.getMessageForUser());
-            } else {
-                answer.setText("The delete command has been canceled");
-            }
-            chatStateMap.put(chatId, ProcessorState.NONE);
-            answer.setChatId(chatId);
+            SendMessage answer = scenarioDeleteAllRecordsForUser(update);
             sendMessage(answer);
         } else {
             if (update.hasMessage()) {
                 Message message = update.getMessage();
-                chatId = update.getMessage().getChatId();
+                Long chatId = update.getMessage().getChatId();
+                SendMessage answer = new SendMessage();
                 isItFirstTime(chatId, answer);
-                answer.setChatId(chatId);
                 if (message.hasText()) {
                     String text = message.getText();
-
                     if (!chatStateMap.get(chatId).equals(ProcessorState.NONE)) {
 
                         if (chatStateMap.get(chatId).equals(ProcessorState.ADD_WAIT_LINK)) {
-                            scenarioAddRecord(text, chatId, answer);
+                            answer = scenarioAddRecord(text, chatId);
+                            sendMessage(answer);
                         }
-
 
                         if (chatStateMap.get(chatId).equals(ProcessorState.SHOW_DIAGRAM_WAIT_PRODUCT_ID) &&
                                 isNumeric(text)) {
-                            scenarioCreateImage(text, String.valueOf(chatId), answer);
-                            answer.setText("Show chart with good id = " + text);
-                            chatStateMap.put(chatId, ProcessorState.NONE);
+                            SendPhoto photo = scenarioCreateImage(Long.valueOf(text), chatId);
+                            sendPhoto(photo);
                         }
-                        sendMessage(answer);
                     } else {
                         if (text.equals("/start")) {
-                            scenarioStart(answer);
+                            answer = scenarioStart(chatId);
                             logger.info("User " + update.getMessage().getChatId() + " starts work");
                         }
                         if (text.equals("/add")) {
-                            answer.setText("Please enter the link");
-                            chatStateMap.put(chatId, ProcessorState.ADD_WAIT_LINK);
+                            answer = scenarioAddWaitLink(chatId);
                         }
                         if (text.equals("/showall")) {
-                            scenarioShowAllGoods(chatId, answer);
+                            answer = scenarioShowAllGoods(chatId);
                         }
                         if (text.equals("/deleteall")) {
-                            answer.setText("Are you sure?");
-                            answer.setReplyMarkup(KeyboardFactory.generateDeleteMarkup());
-                            chatStateMap.put(chatId, ProcessorState.DELETE_ALL_WAIT_ANSWER);
+                            answer = scenarioDeleteAllWaitAnswer(chatId);
                         }
                         if (text.equals("/help")) {
-                            scenarioHelpCommand(answer);
+                            answer = scenarioHelpCommand(chatId);
                         }
                         if (text.equals("/showdiagram")) {
-                            answer.setText("Which product chart you want to see?");
-                            chatStateMap.put(chatId, ProcessorState.SHOW_DIAGRAM_WAIT_PRODUCT_ID);
+                            answer = scenarioShowDiagrammWaitProducctId(chatId);
                         }
                         if (!text.equals("/start")
                                 && !text.equals("/add")
@@ -93,9 +73,8 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
                                 && !text.equals("/help")
                                 && !text.equals("/showdiagram")
                         ) {
+                            answer = scenarioIncorrectInformation(chatId);
                             logger.info("User " + update.getMessage().getChat().getId() + " write incorrect command or information");
-                            answer.setText("It is not a correct command or expected information");
-                            chatStateMap.put(chatId, ProcessorState.NONE);
                         }
                         sendMessage(answer);
                     }
@@ -104,47 +83,86 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
         }
     }
 
-    private void scenarioAddRecord(String text, Long chatId, SendMessage answer) {
-        commonAnswerEntity = new AddRecordUsecase().execute(chatId, text);
-        answer.setText(commonAnswerEntity.getMessageForUser());
+    private SendMessage scenarioIncorrectInformation(Long chatId) {
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId);
+        answer.setText("It is not a correct command or expected information");
         chatStateMap.put(chatId, ProcessorState.NONE);
+        return answer;
+    }
+
+    private SendMessage scenarioShowDiagrammWaitProducctId(Long chatId) {
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId);
+        answer.setText("Which product chart you want to see?");
+        chatStateMap.put(chatId, ProcessorState.SHOW_DIAGRAM_WAIT_PRODUCT_ID);
+        return answer;
+    }
+
+    private SendMessage scenarioDeleteAllWaitAnswer(Long chatId) {
+        SendMessage answer = new SendMessage();
+        answer.setText("Are you sure?");
+        answer.setChatId(chatId);
+        answer.setReplyMarkup(KeyboardFactory.generateDeleteMarkup());
+        chatStateMap.put(chatId, ProcessorState.DELETE_ALL_WAIT_ANSWER);
+        return answer;
+    }
+
+    private SendMessage scenarioAddWaitLink(Long chatId) {
+        SendMessage answer = new SendMessage();
+        answer.setText("Please enter the link");
+        answer.setChatId(chatId);
+        chatStateMap.put(chatId, ProcessorState.ADD_WAIT_LINK);
+        return answer;
+    }
+
+    private SendMessage scenarioAddRecord(String text, Long chatId) {
+        AddRecordAnswerEntity dto = new AddRecordUsecase().execute(chatId, text);
+        SendMessage answer = new SendMessage();
+        answer.setText(dto.getMessageForUser());
+        answer.setChatId(chatId);
+        chatStateMap.put(chatId, ProcessorState.NONE);
+        return answer;
     }
 
 
-    private void scenarioStart(SendMessage answer) {
-        commonAnswerEntity = new StartUsecase().execute();
+    private SendMessage scenarioStart(Long chatId) {
+        CommonAnswerEntity commonAnswerEntity = new StartUsecase().execute();
+        SendMessage answer = new SendMessage();
         answer.enableHtml(true);
         answer.setText(commonAnswerEntity.getMessageForUser());
+        answer.setChatId(chatId);
+        return answer;
     }
 
-    private void scenarioShowAllGoods(Long chatId, SendMessage answer) {
-        commonAnswerEntity = new ShowAllGoodsUsecase().execute(chatId);
+    private SendMessage scenarioShowAllGoods(Long chatId) {
+        ShowAllAnswerEntity answerEntity = new ShowAllGoodsUsecase().execute(chatId);
+        SendMessage answer = new SendMessage();
         answer.enableHtml(true);
-        answer.setText(commonAnswerEntity.getMessageForUser());
+        answer.setChatId(chatId);
+        answer.setText(answerEntity.getMessageForUser());
+        return answer;
     }
 
 
-    private void scenarioHelpCommand(SendMessage answer) {
-        commonAnswerEntity = new HelpUsecase().execute();
+    private SendMessage scenarioHelpCommand(Long chatId) {
+        CommonAnswerEntity commonAnswerEntity = new HelpUsecase().execute();
+        SendMessage answer = new SendMessage();
         answer.enableHtml(true);
+        answer.setChatId(chatId);
         answer.setText(commonAnswerEntity.getMessageForUser());
+        return answer;
     }
 
-    private void scenarioCreateImage(String text, String chatId, SendMessage answer) {
-        try {
-            CreateImageAnswerEntity createImageAnswerEntity = new ShowDiagramUsecase().execute(text);
-            if (createImageAnswerEntity.getAnswerEnum().equals(AnswerEnum.SUCCESSFUL)) {
-                SendPhoto sendPhoto = new SendPhoto();
-                sendPhoto.setPhoto(createImageAnswerEntity.getImage());
-                sendPhoto.setChatId(chatId);
-                execute(sendPhoto);
-            } else {
-                answer.setText(createImageAnswerEntity.getMessageForUser());
-                execute(answer);
-            }
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+    private SendPhoto scenarioCreateImage(Long goodsId, Long chatId) {
+        CreateImageAnswerEntity createImageAnswerEntity = new ShowDiagramUsecase().execute(goodsId);
+        SendPhoto sendPhoto = new SendPhoto();
+        if (createImageAnswerEntity.getAnswerEnum().equals(AnswerEnum.SUCCESSFUL)) {
+            sendPhoto.setPhoto(createImageAnswerEntity.getImage());
+            sendPhoto.setChatId(chatId);
         }
+        chatStateMap.put(chatId, ProcessorState.NONE);
+        return sendPhoto;
     }
 
     private boolean isNumeric(String strNum) {
@@ -168,12 +186,37 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
         }
     }
 
+    private void sendPhoto(SendPhoto sendPhoto) {
+        try {
+            execute(sendPhoto);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void isItFirstTime(Long chatId, SendMessage answer) {
         if (!chatStateMap.containsKey(chatId)) {
             chatStateMap.put(chatId, ProcessorState.NONE);
             ReplyKeyboardMarkup commandsButton = KeyboardFactory.generateKeyboard();
             answer.setReplyMarkup(commandsButton);
         }
+    }
+
+
+    private SendMessage scenarioDeleteAllRecordsForUser(Update update) {
+        Long chatId = Long.valueOf(update.getCallbackQuery().getFrom().getId());
+        SendMessage answer = new SendMessage();
+        isItFirstTime(chatId, answer);
+        if (update.getCallbackQuery().getData().equals("yes") &&
+                chatStateMap.get(chatId).equals(ProcessorState.DELETE_ALL_WAIT_ANSWER)) {
+            CommonAnswerEntity commonAnswerEntity = new DeleteAllUsecase().execute(chatId);
+            answer.setText(commonAnswerEntity.getMessageForUser());
+        } else {
+            answer.setText("The delete command has been canceled");
+        }
+        chatStateMap.put(chatId, ProcessorState.NONE);
+        answer.setChatId(chatId);
+        return answer;
     }
 
     @Override
