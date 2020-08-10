@@ -20,7 +20,7 @@ public interface GoodsInfoMapper {
             @Result(property = "updatedAt", column = "update_at"),
             @Result(property = "isDeleted", column = "is_deleted")
     })
-    List<GoodsInfoRecord> searchByTelegramUserId(@Param("telegramUserId") String telegramUserId);
+    List<GoodsInfoRecord> searchByTelegramUserId(@Param("telegramUserId") Long telegramUserId);
 
 
     @Insert("Insert into goods_info(telegram_user_id,title,price,provider_url,provider_type,create_at,update_at)" +
@@ -30,7 +30,7 @@ public interface GoodsInfoMapper {
 
 
     @Update("Update goods_info set is_deleted = true where telegram_user_id = #{telegramUserId}")
-    void deleteAll(@Param("telegramUserId") String telegramUserId);
+    void deleteAll(@Param("telegramUserId") Long telegramUserId);
 
     @Select("Select * from goods_info where id= #{id} and is_deleted=false limit 1")
     @Results({

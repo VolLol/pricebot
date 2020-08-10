@@ -1,7 +1,7 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.dto.AnswerEnum;
-import net.example.pricebot.core.dto.CommonAnswerEntity;
+import net.example.pricebot.core.answerEntityes.AnswerEnum;
+import net.example.pricebot.core.answerEntityes.CommonAnswerEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

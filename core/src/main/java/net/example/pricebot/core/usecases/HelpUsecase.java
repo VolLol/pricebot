@@ -1,6 +1,6 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.dto.CommonAnswerEntity;
+import net.example.pricebot.core.answerEntityes.CommonAnswerEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +11,7 @@ public class HelpUsecase {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpUsecase.class);
 
-    public  CommonAnswerEntity execute() {
+    public CommonAnswerEntity execute() {
         logger.info("Start execute help usecase");
         CommonAnswerEntity answer = new CommonAnswerEntity();
         StringBuilder stringBuilder = new StringBuilder();

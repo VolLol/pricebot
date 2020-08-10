@@ -14,7 +14,7 @@ public class GoodsInfoRecord {
 
     @Getter
     @Setter
-    private String telegramUserId;
+    private Long telegramUserId;
 
     @Getter
     @Setter

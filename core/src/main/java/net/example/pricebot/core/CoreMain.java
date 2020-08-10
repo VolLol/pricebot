@@ -1,7 +1,6 @@
 package net.example.pricebot.core;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.stage.Stage;
 import net.example.pricebot.core.processors.TelegramPriceBotProcessor;
 import net.example.pricebot.store.DatabaseMigrationTools;
@@ -21,21 +20,17 @@ public class CoreMain extends Application {
     private static String username = "postgres";
     private static String password = "password";
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args)  {
         Application.launch(args);
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage)  {
         ApiContextInitializer.init();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
         DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
-        PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
-        pooledDataSource.setDefaultAutoCommit(true);
-        DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
-        SqlSession session = databaseSessionFactory.getSession().openSession();
         try {
-            telegramBotsApi.registerBot(new TelegramPriceBotProcessor(session));
+            telegramBotsApi.registerBot(new TelegramPriceBotProcessor());
             logger.info("The bot was successfully launched");
         } catch (TelegramApiRequestException e) {
             e.printStackTrace();

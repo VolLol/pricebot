@@ -1,9 +1,12 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.dto.AnswerEnum;
-import net.example.pricebot.core.dto.ShowAllAnswerEntity;
+import net.example.pricebot.core.answerEntityes.AnswerEnum;
+import net.example.pricebot.core.answerEntityes.ShowAllAnswerEntity;
+import net.example.pricebot.store.DatabaseMigrationTools;
+import net.example.pricebot.store.DatabaseSessionFactory;
 import net.example.pricebot.store.mappers.GoodsInfoMapper;
 import net.example.pricebot.store.records.GoodsInfoRecord;
+import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +15,23 @@ import java.util.List;
 
 public class ShowAllGoodsUsecase {
     private static final Logger logger = LoggerFactory.getLogger(ShowAllGoodsUsecase.class);
+    private final String driver = "org.postgresql.Driver";
+    private final String JDBCUrl = "jdbc:postgresql://localhost:5432/pricebotdb";
+    private final String username = "postgres";
+    private final String password = "password";
+    private final SqlSession session;
 
-    public static ShowAllAnswerEntity execute(SqlSession session, String telegramId) {
+    public ShowAllGoodsUsecase() {
+        DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
+        PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
+        DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
+        session = databaseSessionFactory.getSession().openSession();
+        pooledDataSource.setDefaultAutoCommit(true);
+
+    }
+
+
+    public ShowAllAnswerEntity execute(Long telegramId) {
         logger.info("Start execute show all usecase");
         ShowAllAnswerEntity answer = new ShowAllAnswerEntity();
         GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
@@ -33,6 +51,7 @@ public class ShowAllGoodsUsecase {
             answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
 
         }
+        session.close();
         return answer;
     }
 }

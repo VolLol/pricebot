@@ -1,6 +1,6 @@
 package net.example.pricebot.core;
 
-public enum CommandState {
+public enum ProcessorState {
     NONE,
     ADD_WAIT_LINK,
     DELETE_ALL_WAIT_ANSWER,
