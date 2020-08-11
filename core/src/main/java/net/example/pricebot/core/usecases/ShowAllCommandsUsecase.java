@@ -1,19 +1,19 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.answerEntityes.CommonAnswerEntity;
+import net.example.pricebot.core.dto.CommonDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class HelpUsecase {
+public class ShowAllCommandsUsecase {
 
-    private static final Logger logger = LoggerFactory.getLogger(HelpUsecase.class);
+    private static final Logger logger = LoggerFactory.getLogger(ShowAllCommandsUsecase.class);
 
-    public CommonAnswerEntity execute() {
+    public CommonDTO execute() {
         logger.info("Start execute help usecase");
-        CommonAnswerEntity answer = new CommonAnswerEntity();
+        CommonDTO answer = new CommonDTO();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("This bot understand following command:  \n\n");
         for (Map.Entry entry : getAllCommands().entrySet())

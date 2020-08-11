@@ -1,7 +1,7 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.answerEntityes.AnswerEnum;
-import net.example.pricebot.core.answerEntityes.ShowAllAnswerEntity;
+import net.example.pricebot.core.dto.DTOEnum;
+import net.example.pricebot.core.dto.ShowAllGoodsFromWatchlistDTO;
 import net.example.pricebot.store.mappers.GoodsInfoMapper;
 import net.example.pricebot.store.records.GoodsInfoRecord;
 import org.apache.ibatis.session.SqlSession;
@@ -11,18 +11,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class ShowAllGoodsUsecase {
-    private static final Logger logger = LoggerFactory.getLogger(ShowAllGoodsUsecase.class);
+public class ShowAllGoodsFromWatchlistUsecase {
+    private static final Logger logger = LoggerFactory.getLogger(ShowAllGoodsFromWatchlistUsecase.class);
     private final SqlSessionFactory sqlSessionFactory;
 
-    public ShowAllGoodsUsecase(SqlSessionFactory sqlSessionFactory) {
+    public ShowAllGoodsFromWatchlistUsecase(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
     }
 
-    public ShowAllAnswerEntity execute(Long telegramId) {
+    public ShowAllGoodsFromWatchlistDTO execute(Long telegramId) {
         logger.info("Start execute show all usecase");
         SqlSession session = sqlSessionFactory.openSession();
-        ShowAllAnswerEntity answer = new ShowAllAnswerEntity();
+        ShowAllGoodsFromWatchlistDTO answer = new ShowAllGoodsFromWatchlistDTO();
         GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
         List<GoodsInfoRecord> records = goodsInfoMapper.searchByTelegramUserId(telegramId);
         if (!records.isEmpty()) {
@@ -32,12 +32,12 @@ public class ShowAllGoodsUsecase {
             for (GoodsInfoRecord record : records) {
                 stringBuilder.append("<b>" + record.getId() + "</b> " + record.getTitle() + " <b>" + record.getPrice() + " </b>\n");
             }
-            answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
+            answer.setDTOEnum(DTOEnum.SUCCESSFUL);
             answer.setMessageForUser(stringBuilder.toString());
         } else {
             logger.info("The user " + telegramId + " has no goods");
             answer.setMessageForUser("You are not watching any goods");
-            answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
+            answer.setDTOEnum(DTOEnum.SUCCESSFUL);
 
         }
         session.close();

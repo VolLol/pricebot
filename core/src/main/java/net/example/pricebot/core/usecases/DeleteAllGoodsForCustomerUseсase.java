@@ -1,33 +1,33 @@
 package net.example.pricebot.core.usecases;
 
 
-import net.example.pricebot.core.answerEntityes.AnswerEnum;
-import net.example.pricebot.core.answerEntityes.DeleteAllAnswerEntity;
+import net.example.pricebot.core.dto.DTOEnum;
+import net.example.pricebot.core.dto.DeleteAllGoodsForCustomerDTO;
 import net.example.pricebot.store.mappers.GoodsInfoMapper;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeleteAllUsecase {
-    private static final Logger logger = LoggerFactory.getLogger(DeleteAllUsecase.class);
+public class DeleteAllGoodsForCustomerUseсase {
+    private static final Logger logger = LoggerFactory.getLogger(DeleteAllGoodsForCustomerUseсase.class);
 
     private final SqlSessionFactory sqlSessionFactory;
 
-    public DeleteAllUsecase(SqlSessionFactory sqlSessionFactory) {
+    public DeleteAllGoodsForCustomerUseсase(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
 
     }
 
-    public DeleteAllAnswerEntity execute(Long telegramUserId) {
+    public DeleteAllGoodsForCustomerDTO execute(Long telegramUserId) {
         logger.info("Start execute delete usecase");
         SqlSession session = sqlSessionFactory.openSession();
-        DeleteAllAnswerEntity answer = new DeleteAllAnswerEntity();
+        DeleteAllGoodsForCustomerDTO answer = new DeleteAllGoodsForCustomerDTO();
         GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
         goodsInfoMapper.deleteAll(telegramUserId);
         session.commit();
         session.close();
-        answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
+        answer.setDTOEnum(DTOEnum.SUCCESSFUL);
         answer.setMessageForUser("Watchlist has been cleared");
         return answer;
     }

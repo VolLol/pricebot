@@ -1,7 +1,7 @@
 package net.example.pricebot.core.processors;
 
 import net.example.pricebot.core.BotConfig;
-import net.example.pricebot.core.answerEntityes.*;
+import net.example.pricebot.core.dto.*;
 import net.example.pricebot.core.usecases.*;
 import net.example.pricebot.core.utils.KeyboardFactory;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -21,20 +21,20 @@ import java.util.Map;
 public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(TelegramPriceBotProcessor.class);
     private Map<Long, ProcessorState> chatStateMap = new HashMap<>();
-    private final AddRecordUsecase addRecordUseCase;
-    private final DeleteAllUsecase deleteAllUsecase;
-    private final ShowAllGoodsUsecase showAllGoodsUsecase;
-    private final ShowDiagramUsecase showDiagramUsecase;
-    private final HelpUsecase helpUsecase;
-    private final StartUsecase startUsecase;
+    private final AddGoodsToWatchlistUsecase addGoodsToWatchlistUseCase;
+    private final DeleteAllGoodsForCustomerUseсase deleteAllGoodsForCustomerUseсase;
+    private final ShowAllGoodsFromWatchlistUsecase showAllGoodsFromWatchlistUsecase;
+    private final ShowChatPriceChangesByGoodIdUsecase showChatPriceChangesByGoodIdUsecase;
+    private final ShowAllCommandsUsecase showAllCommandsUsecase;
+    private final ShowWelcomeMessageUseCase showWelcomeMessageUseCase;
 
     public TelegramPriceBotProcessor(SqlSessionFactory sqlSessionFactory) {
-        this.addRecordUseCase = new AddRecordUsecase(sqlSessionFactory);
-        this.deleteAllUsecase = new DeleteAllUsecase(sqlSessionFactory);
-        this.showAllGoodsUsecase = new ShowAllGoodsUsecase(sqlSessionFactory);
-        this.showDiagramUsecase = new ShowDiagramUsecase(sqlSessionFactory);
-        this.helpUsecase = new HelpUsecase();
-        this.startUsecase = new StartUsecase();
+        this.addGoodsToWatchlistUseCase = new AddGoodsToWatchlistUsecase(sqlSessionFactory);
+        this.deleteAllGoodsForCustomerUseсase = new DeleteAllGoodsForCustomerUseсase(sqlSessionFactory);
+        this.showAllGoodsFromWatchlistUsecase = new ShowAllGoodsFromWatchlistUsecase(sqlSessionFactory);
+        this.showChatPriceChangesByGoodIdUsecase = new ShowChatPriceChangesByGoodIdUsecase(sqlSessionFactory);
+        this.showAllCommandsUsecase = new ShowAllCommandsUsecase();
+        this.showWelcomeMessageUseCase = new ShowWelcomeMessageUseCase();
 
     }
 
@@ -134,7 +134,7 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
     }
 
     private SendMessage scenarioAddRecord(String goodsUrl, Long telegramId) {
-        AddRecordAnswerEntity dto = this.addRecordUseCase.execute(telegramId, goodsUrl);
+        AddGoodsToWatchlistDTO dto = this.addGoodsToWatchlistUseCase.execute(telegramId, goodsUrl);
         SendMessage answer = new SendMessage();
         answer.setText(dto.getMessageForUser());
         answer.setChatId(telegramId);
@@ -144,16 +144,16 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
 
 
     private SendMessage scenarioStart(Long telegramId) {
-        CommonAnswerEntity commonAnswerEntity = this.startUsecase.execute();
+        CommonDTO commonDTO = this.showWelcomeMessageUseCase.execute();
         SendMessage answer = new SendMessage();
         answer.enableHtml(true);
-        answer.setText(commonAnswerEntity.getMessageForUser());
+        answer.setText(commonDTO.getMessageForUser());
         answer.setChatId(telegramId);
         return answer;
     }
 
     private SendMessage scenarioShowAllGoods(Long telegramId) {
-        ShowAllAnswerEntity answerEntity = this.showAllGoodsUsecase.execute(telegramId);
+        ShowAllGoodsFromWatchlistDTO answerEntity = this.showAllGoodsFromWatchlistUsecase.execute(telegramId);
         SendMessage answer = new SendMessage();
         answer.enableHtml(true);
         answer.setChatId(telegramId);
@@ -163,18 +163,18 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
 
 
     private SendMessage scenarioHelpCommand(Long telegramId) {
-        CommonAnswerEntity commonAnswerEntity = this.helpUsecase.execute();
+        CommonDTO commonDTO = this.showAllCommandsUsecase.execute();
         SendMessage answer = new SendMessage();
         answer.enableHtml(true);
         answer.setChatId(telegramId);
-        answer.setText(commonAnswerEntity.getMessageForUser());
+        answer.setText(commonDTO.getMessageForUser());
         return answer;
     }
 
     private SendPhoto scenarioCreateImage(Long goodsId, Long telegramId) {
-        CreateImageAnswerEntity createImageAnswerEntity = this.showDiagramUsecase.execute(goodsId);
+        ShowChatPriceChangesByGoodIdDTO createImageAnswerEntity = this.showChatPriceChangesByGoodIdUsecase.execute(goodsId);
         SendPhoto sendPhoto = new SendPhoto();
-        if (createImageAnswerEntity.getAnswerEnum().equals(AnswerEnum.SUCCESSFUL)) {
+        if (createImageAnswerEntity.getDTOEnum().equals(DTOEnum.SUCCESSFUL)) {
             sendPhoto.setPhoto(createImageAnswerEntity.getImage());
             sendPhoto.setChatId(telegramId);
         }
@@ -226,8 +226,8 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
         isItFirstTime(telegramId, answer);
         if (update.getCallbackQuery().getData().equals("yes") &&
                 chatStateMap.get(telegramId).equals(ProcessorState.DELETE_ALL_WAIT_ANSWER)) {
-            CommonAnswerEntity commonAnswerEntity = this.deleteAllUsecase.execute(telegramId);
-            answer.setText(commonAnswerEntity.getMessageForUser());
+            CommonDTO commonDTO = this.deleteAllGoodsForCustomerUseсase.execute(telegramId);
+            answer.setText(commonDTO.getMessageForUser());
         } else {
             answer.setText("The delete command has been canceled");
         }

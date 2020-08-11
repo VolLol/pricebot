@@ -1,14 +1,14 @@
-package net.example.pricebot.core.answerEntityes;
+package net.example.pricebot.core.dto;
 
 
 import lombok.Getter;
 import lombok.Setter;
 
-public class CommonAnswerEntity {
+public class CommonDTO {
 
     @Getter
     @Setter
-    AnswerEnum answerEnum;
+    DTOEnum DTOEnum;
 
     @Setter
     @Getter

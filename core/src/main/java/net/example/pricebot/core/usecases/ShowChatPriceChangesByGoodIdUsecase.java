@@ -1,7 +1,7 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.answerEntityes.AnswerEnum;
-import net.example.pricebot.core.answerEntityes.CreateImageAnswerEntity;
+import net.example.pricebot.core.dto.DTOEnum;
+import net.example.pricebot.core.dto.ShowChatPriceChangesByGoodIdDTO;
 import net.example.pricebot.graphic.ChartTool;
 import net.example.pricebot.graphic.dto.ChartPriceDTO;
 import net.example.pricebot.graphic.dto.ChartRowItemDTO;
@@ -20,28 +20,28 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class ShowDiagramUsecase {
-    private static final Logger logger = LoggerFactory.getLogger(ShowDiagramUsecase.class);
+public class ShowChatPriceChangesByGoodIdUsecase {
+    private static final Logger logger = LoggerFactory.getLogger(ShowChatPriceChangesByGoodIdUsecase.class);
     private final SqlSessionFactory sqlSessionFactory;
 
 
-    public ShowDiagramUsecase(SqlSessionFactory sqlSessionFactory) {
+    public ShowChatPriceChangesByGoodIdUsecase(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
     }
 
-    public CreateImageAnswerEntity execute(Long goodId) {
+    public ShowChatPriceChangesByGoodIdDTO execute(Long goodId) {
         logger.info("Start execute show diagram usecase");
-        CreateImageAnswerEntity answer = new CreateImageAnswerEntity();
+        ShowChatPriceChangesByGoodIdDTO answer = new ShowChatPriceChangesByGoodIdDTO();
         try {
             ChartPriceDTO chartPriceDTO = preparingDate(goodId);
             File image = ChartTool.draw(chartPriceDTO);
             answer.setImage(image);
-            answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
+            answer.setDTOEnum(DTOEnum.SUCCESSFUL);
             answer.setMessageForUser("It is diagram for good with id " + goodId);
             logger.info("Successful execution diagram usecase");
         } catch (NullPointerException e) {
             logger.info("Goods with id = " + goodId + " not exist");
-            answer.setAnswerEnum(AnswerEnum.UNSUCCESSFUL);
+            answer.setDTOEnum(DTOEnum.UNSUCCESSFUL);
             answer.setMessageForUser("Goods with id = " + goodId + " not exist");
         }
         return answer;

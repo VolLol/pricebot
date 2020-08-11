@@ -1,25 +1,25 @@
 package net.example.pricebot.core.usecases;
 
-import net.example.pricebot.core.answerEntityes.AnswerEnum;
-import net.example.pricebot.core.answerEntityes.CommonAnswerEntity;
+import net.example.pricebot.core.dto.DTOEnum;
+import net.example.pricebot.core.dto.CommonDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class StartUsecase {
-    private static final Logger logger = LoggerFactory.getLogger(StartUsecase.class);
+public class ShowWelcomeMessageUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(ShowWelcomeMessageUseCase.class);
 
-    public CommonAnswerEntity execute() {
+    public CommonDTO execute() {
         logger.info("Start execute start usecase");
-        CommonAnswerEntity answer = new CommonAnswerEntity();
+        CommonDTO answer = new CommonDTO();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Welcome to Avito ParserBot!\n\n" +
                 "This bot understand following command:  \n\n");
         for (Map.Entry entry : getAllCommands().entrySet())
             stringBuilder.append("<b>" + entry.getKey() + "</b>" + " - " + entry.getValue() + "\n\n");
-        answer.setAnswerEnum(AnswerEnum.SUCCESSFUL);
+        answer.setDTOEnum(DTOEnum.SUCCESSFUL);
         answer.setMessageForUser(stringBuilder.toString());
         return answer;
     }
