@@ -6,7 +6,6 @@ import net.example.pricebot.core.processors.TelegramPriceBotProcessor;
 import net.example.pricebot.store.DatabaseMigrationTools;
 import net.example.pricebot.store.DatabaseSessionFactory;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
-import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.ApiContextInitializer;
@@ -29,8 +28,11 @@ public class CoreMain extends Application {
         ApiContextInitializer.init();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
         DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
+        PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
+        DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
+        pooledDataSource.setDefaultAutoCommit(true);
         try {
-            telegramBotsApi.registerBot(new TelegramPriceBotProcessor());
+            telegramBotsApi.registerBot(new TelegramPriceBotProcessor(databaseSessionFactory.getSession()));
             logger.info("The bot was successfully launched");
         } catch (TelegramApiRequestException e) {
             e.printStackTrace();

@@ -5,14 +5,12 @@ import net.example.pricebot.core.answerEntityes.CreateImageAnswerEntity;
 import net.example.pricebot.graphic.ChartTool;
 import net.example.pricebot.graphic.dto.ChartPriceDTO;
 import net.example.pricebot.graphic.dto.ChartRowItemDTO;
-import net.example.pricebot.store.DatabaseMigrationTools;
-import net.example.pricebot.store.DatabaseSessionFactory;
 import net.example.pricebot.store.mappers.GoodsHistoryPriceMapper;
 import net.example.pricebot.store.mappers.GoodsInfoMapper;
 import net.example.pricebot.store.records.GoodsHistoryPriceRecord;
 import net.example.pricebot.store.records.GoodsInfoRecord;
-import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,17 +22,11 @@ import java.util.List;
 
 public class ShowDiagramUsecase {
     private static final Logger logger = LoggerFactory.getLogger(ShowDiagramUsecase.class);
-    private final String driver = "org.postgresql.Driver";
-    private final String JDBCUrl = "jdbc:postgresql://localhost:5432/pricebotdb";
-    private final String username = "postgres";
-    private final String password = "password";
-    private final SqlSession session;
+    private final SqlSessionFactory sqlSessionFactory;
 
-    public ShowDiagramUsecase() {
-        DatabaseMigrationTools.updateDatabaseVersion(JDBCUrl, username, password);
-        PooledDataSource pooledDataSource = new PooledDataSource(driver, JDBCUrl, username, password);
-        DatabaseSessionFactory databaseSessionFactory = new DatabaseSessionFactory(pooledDataSource);
-        session = databaseSessionFactory.getSession().openSession();
+
+    public ShowDiagramUsecase(SqlSessionFactory sqlSessionFactory) {
+        this.sqlSessionFactory = sqlSessionFactory;
     }
 
     public CreateImageAnswerEntity execute(Long goodId) {
@@ -51,13 +43,12 @@ public class ShowDiagramUsecase {
             logger.info("Goods with id = " + goodId + " not exist");
             answer.setAnswerEnum(AnswerEnum.UNSUCCESSFUL);
             answer.setMessageForUser("Goods with id = " + goodId + " not exist");
-        } finally {
-            session.close();
         }
         return answer;
     }
 
     private ChartPriceDTO preparingDate(Long goodId) {
+        SqlSession session = sqlSessionFactory.openSession();
         GoodsHistoryPriceMapper goodsHistoryPriceMapper = session.getMapper(GoodsHistoryPriceMapper.class);
         List<GoodsHistoryPriceRecord> goodsHistoryPriceList = goodsHistoryPriceMapper.searchTop14ByGoodsId(goodId);
         if (!goodsHistoryPriceList.isEmpty()) {
