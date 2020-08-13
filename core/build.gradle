@@ -23,6 +23,7 @@ dependencies {
     implementation(project(':graphic'))
     implementation(project(':harvester'))
     implementation(project(':store'))
+    implementation(project(':scheduler'))
 
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'

@@ -2,6 +2,7 @@ package net.example.pricebot.store;
 
 import net.example.pricebot.store.mappers.GoodsHistoryPriceMapper;
 import net.example.pricebot.store.mappers.GoodsInfoMapper;
+import net.example.pricebot.store.mappers.SchedulerMapper;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -20,6 +21,7 @@ public class DatabaseSessionFactory {
         Configuration configuration = new Configuration(environment);
         configuration.addMapper(GoodsInfoMapper.class);
         configuration.addMapper(GoodsHistoryPriceMapper.class);
+        configuration.addMapper(SchedulerMapper.class);
         session = new SqlSessionFactoryBuilder().build(configuration);
     }
 

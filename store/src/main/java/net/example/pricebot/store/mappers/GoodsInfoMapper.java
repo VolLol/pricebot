@@ -50,4 +50,21 @@ public interface GoodsInfoMapper {
     @Select("Select id from goods_info where provider_url= #{url}")
     Long searchGoodByUrl(@Param("url") String url);
 
+    @Select("Select * from goods_info where is_deleted=false")
+    @Results({
+            @Result(property = "id", column = "id"),
+            @Result(property = "telegramUserId", column = "telegram_user_id"),
+            @Result(property = "price", column = "price"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "providerUrl", column = "provider_url"),
+            @Result(property = "providerType", column = "provider_type"),
+            @Result(property = "createdAt", column = "create_at"),
+            @Result(property = "updatedAt", column = "update_at"),
+            @Result(property = "isDeleted", column = "is_deleted")
+    })
+    List<GoodsInfoRecord> getAllNotDeletedGoods();
+
+
+    @Update("Update goods_info SET update_at = now() where id = #{goodId}")
+    void updateDate(@Param("goodId") Long goodId);
 }
