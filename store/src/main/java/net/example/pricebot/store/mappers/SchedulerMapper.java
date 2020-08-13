@@ -4,7 +4,7 @@ import net.example.pricebot.store.records.SchedulerRecord;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface SchedulerMapper {
@@ -14,6 +14,6 @@ public interface SchedulerMapper {
 
 
     @Insert("Insert into goods_history_price_tasks(execute_date) values (#{executeDate})")
-    void create(LocalDateTime executeDate);
+    void create(LocalDate executeDate);
 
 }

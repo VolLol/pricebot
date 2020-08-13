@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class GoodsPriceHistoryUpdaterScheduler implements Runnable {
 
     public GoodsPriceHistoryUpdaterScheduler(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
+
     }
 
     @Override
@@ -90,14 +92,14 @@ public class GoodsPriceHistoryUpdaterScheduler implements Runnable {
         logger.info("Start adding date to db");
         SqlSession session = sqlSessionFactory.openSession();
         SchedulerMapper schedulerMapper = session.getMapper(SchedulerMapper.class);
-        schedulerMapper.create(LocalDateTime.now());
+        schedulerMapper.create(LocalDate.now());
         session.commit();
         session.close();
     }
 
     private boolean isUpdatedDateContainInDB() {
         logger.info("Start checking date exists in the database");
-        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDate currentDate = LocalDate.now();
         SqlSession session = sqlSessionFactory.openSession();
         SchedulerMapper schedulerMapper = session.getMapper(SchedulerMapper.class);
         List<SchedulerRecord> records = schedulerMapper.showAllRecords();
@@ -120,7 +122,7 @@ public class GoodsPriceHistoryUpdaterScheduler implements Runnable {
     }
 
 
-    private boolean isDatesEquals(LocalDateTime currentDate, LocalDateTime record) {
+    private boolean isDatesEquals(LocalDate currentDate, LocalDate record) {
         return currentDate.getYear() == record.getYear()
                 && currentDate.getMonth() == record.getMonth()
                 && currentDate.getDayOfMonth() == record.getDayOfMonth();
