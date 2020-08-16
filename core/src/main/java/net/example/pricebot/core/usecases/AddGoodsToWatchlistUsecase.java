@@ -28,7 +28,7 @@ public class AddGoodsToWatchlistUsecase {
     public AddGoodsToWatchlistDTO execute(Long telegramUserId, String goodsUrl) {
         logger.info("Start execute add record usecase");
         SqlSession session = sqlSessionFactory.openSession();
-        Pattern linkPattern = Pattern.compile("^https\\:\\/\\/www\\.avito\\.ru\\/.+");
+        Pattern linkPattern = Pattern.compile("^https://www\\.avito\\.ru/.+");
         AddGoodsToWatchlistDTO answer = new AddGoodsToWatchlistDTO();
         Matcher matcher = linkPattern.matcher(goodsUrl);
         if (matcher.matches()) {

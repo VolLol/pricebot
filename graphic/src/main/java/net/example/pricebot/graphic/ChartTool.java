@@ -27,33 +27,30 @@ public class ChartTool {
     public static File draw(ChartPriceDTO chartPriceDTO) {
         synchronized (sync) {
             setResultReady(false);
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    Stage stage = new Stage();
-                    CategoryAxis x = new CategoryAxis();
-                    NumberAxis y = new NumberAxis();
-                    LineChart lineChart = new LineChart<>(x, y);
-                    XYChart.Series series = new XYChart.Series();
-                    y.setLabel("Price");
-                    x.setLabel("Dates");
-                    lineChart.setTitle(chartPriceDTO.getTitle());
-                    series.setName("price from the " + chartPriceDTO.getStartAtAsStringDate() + " to the " + chartPriceDTO.getFinishAtAsStringDate());
-                    for (ChartRowItemDTO row : chartPriceDTO.getItems()) {
-                        series.getData().add(new XYChart.Data<>(row.getDateAsString(), row.getPrice()));
-                    }
-
-                    Scene scene = new Scene(lineChart, 600, 600);
-                    lineChart.getData().add(series);
-                    stage.setScene(scene);
-                    stage.close();
-                    try {
-                        setResultFile(saveChartToImage(lineChart));
-                    } catch (IOException e) {
-                        setResultFile(null);
-                    }
-                    setResultReady(true);
+            Platform.runLater(() -> {
+                Stage stage = new Stage();
+                CategoryAxis x = new CategoryAxis();
+                NumberAxis y = new NumberAxis();
+                LineChart lineChart = new LineChart<>(x, y);
+                XYChart.Series series = new XYChart.Series();
+                y.setLabel("Price");
+                x.setLabel("Dates");
+                lineChart.setTitle(chartPriceDTO.getTitle());
+                series.setName("price from the " + chartPriceDTO.getStartAtAsStringDate() + " to the " + chartPriceDTO.getFinishAtAsStringDate());
+                for (ChartRowItemDTO row : chartPriceDTO.getItems()) {
+                    series.getData().add(new XYChart.Data<>(row.getDateAsString(), row.getPrice()));
                 }
+
+                Scene scene = new Scene(lineChart, 600, 600);
+                lineChart.getData().add(series);
+                stage.setScene(scene);
+                stage.close();
+                try {
+                    setResultFile(saveChartToImage(lineChart));
+                } catch (IOException e) {
+                    setResultFile(null);
+                }
+                setResultReady(true);
             });
 
             while (!isResultReady()) {

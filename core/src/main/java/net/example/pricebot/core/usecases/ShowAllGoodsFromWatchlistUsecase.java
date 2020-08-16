@@ -9,6 +9,8 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ShowAllGoodsFromWatchlistUsecase {
@@ -25,15 +27,17 @@ public class ShowAllGoodsFromWatchlistUsecase {
         ShowAllGoodsFromWatchlistDTO answer = new ShowAllGoodsFromWatchlistDTO();
         GoodsInfoMapper goodsInfoMapper = session.getMapper(GoodsInfoMapper.class);
         List<GoodsInfoRecord> records = goodsInfoMapper.searchByTelegramUserId(telegramId);
+        Collection<String> messages = new ArrayList<>();
         if (!records.isEmpty()) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("You watching the following goods: \n");
-            stringBuilder.append("<b>Id Title  Price</b>\n");
+            messages.add("You watching the following goods: ");
             for (GoodsInfoRecord record : records) {
-                stringBuilder.append("<b>" + record.getId() + "</b> " + record.getTitle() + " <b>" + record.getPrice() + " </b>\n");
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("<b>Id : </b> " + record.getId() + "\n");
+                stringBuilder.append("<b>Title : </b> " + record.getTitle() + "\n");
+                stringBuilder.append("<b>Price : </b> " + record.getPrice() + "\n");
+                messages.add(stringBuilder.toString());
             }
-            answer.setDTOEnum(DTOEnum.SUCCESSFUL);
-            answer.setMessageForUser(stringBuilder.toString());
+            answer.setAllGoods(messages);
         } else {
             logger.info("The user " + telegramId + " has no goods");
             answer.setMessageForUser("You are not watching any goods");

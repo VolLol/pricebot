@@ -3,6 +3,4 @@ include 'store'
 include 'graphic'
 include 'harvester'
 include 'core'
-include 'telegram'
-include 'scheduler'
 

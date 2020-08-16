@@ -3,6 +3,7 @@ package net.example.pricebot.store.mappers;
 import net.example.pricebot.store.records.GoodsInfoRecord;
 import org.apache.ibatis.annotations.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface GoodsInfoMapper {
@@ -64,7 +65,6 @@ public interface GoodsInfoMapper {
     })
     List<GoodsInfoRecord> getAllNotDeletedGoods();
 
-
-    @Update("Update goods_info SET update_at = now() where id = #{goodId}")
-    void updateDate(@Param("goodId") Long goodId);
+    @Update("Update goods_info SET price = #{price}, update_at = #{updateAt} where id = #{id}")
+    void update(@Param("id") Long id, @Param("price") Integer price, @Param("updateAt") LocalDateTime updateAt);
 }

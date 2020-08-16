@@ -1,6 +1,6 @@
 package net.example.pricebot.core.processors;
 
-import net.example.pricebot.core.BotConfig;
+import net.example.pricebot.core.PriceBotServerConfig;
 import net.example.pricebot.core.dto.*;
 import net.example.pricebot.core.usecases.*;
 import net.example.pricebot.core.utils.KeyboardFactory;
@@ -15,12 +15,14 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(TelegramPriceBotProcessor.class);
-    private Map<Long, ProcessorState> chatStateMap = new HashMap<>();
+    private final Map<Long, ProcessorState> chatStateMap = new HashMap<>();
     private final AddGoodsToWatchlistUsecase addGoodsToWatchlistUseCase;
     private final DeleteAllGoodsForCustomerUseсase deleteAllGoodsForCustomerUseсase;
     private final ShowAllGoodsFromWatchlistUsecase showAllGoodsFromWatchlistUsecase;
@@ -72,7 +74,10 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
                             answer = scenarioAddWaitLink(telegramId);
                         }
                         if (text.equals("/showall")) {
-                            answer = scenarioShowAllGoods(telegramId);
+                            Collection<SendMessage> messages = scenarioShowAllGoods(telegramId);
+                            for (SendMessage mes : messages) {
+                                sendMessage(mes);
+                            }
                         }
                         if (text.equals("/deleteall")) {
                             answer = scenarioDeleteAllWaitAnswer(telegramId);
@@ -152,13 +157,17 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
         return answer;
     }
 
-    private SendMessage scenarioShowAllGoods(Long telegramId) {
+    private Collection<SendMessage> scenarioShowAllGoods(Long telegramId) {
         ShowAllGoodsFromWatchlistDTO answerEntity = this.showAllGoodsFromWatchlistUsecase.execute(telegramId);
-        SendMessage answer = new SendMessage();
-        answer.enableHtml(true);
-        answer.setChatId(telegramId);
-        answer.setText(answerEntity.getMessageForUser());
-        return answer;
+        Collection<SendMessage> messages = new ArrayList<>();
+        for (String s : answerEntity.getAllGoods()) {
+            SendMessage mes = new SendMessage();
+            mes.setChatId(telegramId);
+            mes.enableHtml(true);
+            mes.setText(s);
+            messages.add(mes);
+        }
+        return messages;
     }
 
 
@@ -196,10 +205,12 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
 
 
     private void sendMessage(SendMessage message) {
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        if (message != null && !message.getChatId().isEmpty() && !message.getText().isEmpty()) {
+            try {
+                execute(message);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -238,11 +249,11 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return BotConfig.BOT_NAME;
+        return PriceBotServerConfig.BOT_NAME;
     }
 
     @Override
     public String getBotToken() {
-        return BotConfig.TOKEN;
+        return PriceBotServerConfig.TOKEN;
     }
 }
