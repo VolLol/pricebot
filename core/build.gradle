@@ -17,7 +17,7 @@ repositories {
 dependencies {
     javafx {
         version = "11.0.2"
-        modules = ['javafx.controls']
+        modules = ['javafx.controls', 'javafx.swing']
     }
 
     implementation(project(':graphic'))
@@ -27,6 +27,7 @@ dependencies {
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'org.telegram', name: 'telegrambots', version: '4.9'
+    compile 'com.vdurmont:emoji-java:5.1.1'
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 

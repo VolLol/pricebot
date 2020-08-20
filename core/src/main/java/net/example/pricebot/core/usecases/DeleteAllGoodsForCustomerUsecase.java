@@ -9,12 +9,12 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeleteAllGoodsForCustomerUseсase {
-    private static final Logger logger = LoggerFactory.getLogger(DeleteAllGoodsForCustomerUseсase.class);
+public class DeleteAllGoodsForCustomerUsecase {
+    private static final Logger logger = LoggerFactory.getLogger(DeleteAllGoodsForCustomerUsecase.class);
 
     private final SqlSessionFactory sqlSessionFactory;
 
-    public DeleteAllGoodsForCustomerUseсase(SqlSessionFactory sqlSessionFactory) {
+    public DeleteAllGoodsForCustomerUsecase(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
 
     }
