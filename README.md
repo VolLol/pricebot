@@ -21,7 +21,7 @@
  1. /showdiagram - показывает сгенерированное изображение графика изменения цены
  1. /help - показывает список всех доступных команд
  
- # Сборка и запуск проекта локально
+#Сборка и запуск проекта локально
 Для работы требуется зарегистрировать имя и получить токен телеграм-бота. Это можно сделать через @BotFather. Выбранное имя и полученный токен необходимо разместить в классе PriceBotServerConfig в переменных BOT_NAME и TOKEN соответственно.
 
 Так же для проекта необходима база данных PostgreSql. Для этого можно использовать Docker выполнив следующую команду:
@@ -36,7 +36,9 @@ gradle run
 ```
 
 #Демонстраци работы сервера
+
 ![Server side](https://i.ibb.co/mRjHzRb/render1597924280359.gif)
 
 #Демонстраци работы клиента
+
 [![TelegramAvitoParserBot](https://res.cloudinary.com/marcomontalbano/image/upload/v1597941345/video_to_markdown/images/youtube--uURNdyMzTCE-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://youtu.be/uURNdyMzTCE "TelegramAvitoParserBot")
