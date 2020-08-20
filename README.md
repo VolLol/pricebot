@@ -39,4 +39,4 @@ gradle run
 ![Server side](https://i.ibb.co/mRjHzRb/render1597924280359.gif)
 
 #Демонстраци работы клиента
-![Client side](https://i.ibb.co/2hw9rL0/be4bc634-187a-4eba-b513-fb6b37565f7a.gif)
+[![TelegramAvitoParserBot](https://res.cloudinary.com/marcomontalbano/image/upload/v1597941345/video_to_markdown/images/youtube--uURNdyMzTCE-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://youtu.be/uURNdyMzTCE "TelegramAvitoParserBot")
