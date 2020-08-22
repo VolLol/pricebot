@@ -15,8 +15,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,14 +113,14 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
     private SendMessage scenarioShowDiagramWaitProductId(Long telegramId) {
         SendMessage answer = new SendMessage();
         answer.setChatId(telegramId);
-        answer.setText("Which product chart you want to see?");
+        answer.setText("What chart's goods you want to see?");
         chatStateMap.put(telegramId, ProcessorState.SHOW_DIAGRAM_WAIT_PRODUCT_ID);
         return answer;
     }
 
     private SendMessage scenarioDeleteAllWaitAnswer(Long telegramId) {
         SendMessage answer = new SendMessage();
-        answer.setText("Are you sure?");
+        answer.setText("Are you sure you want to remove all goods from your watchlist?");
         answer.setChatId(telegramId);
         answer.setReplyMarkup(KeyboardFactory.generateDeleteMarkup());
         chatStateMap.put(telegramId, ProcessorState.DELETE_ALL_WAIT_ANSWER);
@@ -131,7 +129,7 @@ public class TelegramPriceBotProcessor extends TelegramLongPollingBot {
 
     private SendMessage scenarioAddWaitLink(Long telegramId) {
         SendMessage answer = new SendMessage();
-        answer.setText("Please enter the link");
+        answer.setText("Please send the link to the product");
         answer.setChatId(telegramId);
         chatStateMap.put(telegramId, ProcessorState.ADD_WAIT_LINK);
         return answer;

@@ -35,10 +35,9 @@ docker-compose.exe up -d
 gradle run
 ```
 
-#Демонстраци работы сервера
+#Демонстраця работы 
 
-![Server side](https://i.ibb.co/mRjHzRb/render1597924280359.gif)
+Пример работы сервера можно посмотреть [здесь](https://terminalizer.com/view/d40ca1b14212), а клиента [здесь](https://youtu.be/uURNdyMzTCE).
 
-#Демонстраци работы клиента
-
-[![TelegramAvitoParserBot](https://res.cloudinary.com/marcomontalbano/image/upload/v1597941345/video_to_markdown/images/youtube--uURNdyMzTCE-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://youtu.be/uURNdyMzTCE "TelegramAvitoParserBot")
+Вывод графика показан ниже
+![Chart Example](https://i.ibb.co/hmBw2r8/price-chart-example.jpg)
